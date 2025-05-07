@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6. Sınıf Arduino Online Deneme Sınavı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .question {
+            background: #f8fafc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .question:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .question h3 {
+            margin: 0 0 15px;
+            color: #1e3a8a;
+            font-size: 1.3em;
+        }
+        .options label {
+            display: block;
+            padding: 12px;
+            margin: 5px 0;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background: #cbd5e1;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-summary {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 4px solid;
+            border-radius: 8px;
+        }
+        .question-summary.correct {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+        .question-summary.incorrect {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .question-summary p {
+            margin: 5px 0;
+        }
+        .summary-status {
+            font-weight: bold;
+        }
+        .summary-status.correct {
+            color: #10b981;
+        }
+        .summary-status.incorrect {
+            color: #ef4444;
+        }
+        #submitExam {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #submitExam:hover {
+            background: #1e40af;
+        }
+        #score {
+            text-align: center;
+            font-size: 1.4em;
+            color: #1e3a8a;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .question h3 {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>6. Sınıf Arduino Online Deneme Sınavı</h1>
+        <form id="quizForm">
+            <!-- Sorular dinamik olarak burada oluşturulacak -->
+            <button type="button" id="submitExam">Sınavı Bitir</button>
+        </form>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Sorular JSON formatında
+        const questions = [
+            {
+                id: 1,
+                question: "Arduino nedir?",
+                options: [
+                    "a) Bir programlama dili",
+                    "b) Bir mikrodenetleyici kartı",
+                    "c) Bir bilgisayar oyunu",
+                    "d) Bir robot kiti"
+                ],
+                correct: "b",
+                explanation: "Arduino, elektronik projelerde kullanılan bir mikrodenetleyici kartıdır. Sensörler, motorlar ve LED’ler gibi bileşenleri kontrol etmek için kullanılır. Programlama dili değil, donanım platformudur."
+            },
+            {
+                id: 2,
+                question: "Arduino kartında programları yazmak için hangi yazılım kullanılır?",
+                options: [
+                    "a) Microsoft Word",
+                    "b) Arduino IDE",
+                    "c) Paint",
+                    "d) Notepad"
+                ],
+                correct: "b",
+                explanation: "Arduino IDE (Integrated Development Environment), Arduino kartına program yazmak ve yüklemek için kullanılan resmi yazılımdır. Diğer seçenekler bu amaç için uygun değildir."
+            },
+            {
+                id: 3,
+                question: "Arduino’da bir LED’i yakmak için hangi komut kullanılır?",
+                options: [
+                    "a) digitalWrite()",
+                    "b) analogRead()",
+                    "c) delay()",
+                    "d) Serial.begin()"
+                ],
+                correct: "a",
+                explanation: "digitalWrite() komutu, bir pinin (örneğin, LED bağlı olan pin) durumunu HIGH (açık) veya LOW (kapalı) olarak ayarlar. Bu, LED’i yakmak veya söndürmek için kullanılır."
+            },
+            {
+                id: 4,
+                question: "Arduino kartında 'pinMode' fonksiyonu ne için kullanılır?",
+                options: [
+                    "a) Bir pini giriş veya çıkış olarak ayarlamak",
+                    "b) Programı durdurmak",
+                    "c) Sensör verisi okumak",
+                    "d) LED yakmak"
+                ],
+                correct: "a",
+                explanation: "pinMode() fonksiyonu, Arduino’nun dijital pinlerini giriş (INPUT) veya çıkış (OUTPUT) olarak tanımlamak için kullanılır. Örneğin, bir LED için OUTPUT, bir buton için INPUT kullanılır."
+            },
+            {
+                id: 5,
+                question: "Arduino’da 'delay(1000)' komutu ne yapar?",
+                options: [
+                    "a) Programı 1 saniye bekletir",
+                    "b) LED’i 1 saniye yakar",
+                    "c) Sensör verisi okur",
+                    "d) Programı durdurur"
+                ],
+                correct: "a",
+                explanation: "delay() fonksiyonu, programın yürütülmesini belirtilen süre (milisaniye cinsinden) durdurur. delay(1000), 1000 milisaniye yani 1 saniye bekletir."
+            },
+            {
+                id: 6,
+                question: "Arduino’da bir pinin durumunu HIGH yapmak ne anlama gelir?",
+                options: [
+                    "a) Pini kapatmak",
+                    "b) Pini 5V seviyesine getirmek",
+                    "c) Pini 0V seviyesine getirmek",
+                    "d) Pini giriş olarak ayarlamak"
+                ],
+                correct: "b",
+                explanation: "HIGH durumu, Arduino’da bir pinin 5V seviyesine (aktif) getirilmesi anlamına gelir. Bu, örneğin bir LED’in yanmasını sağlar."
+            },
+            {
+                id: 7,
+                question: "Arduino’da bir LED’in bağlı olduğu pin genellikle hangi modda ayarlanır?",
+                options: [
+                    "a) INPUT",
+                    "b) OUTPUT",
+                    "c) ANALOG",
+                    "d) SERIAL"
+                ],
+                correct: "b",
+                explanation: "LED gibi bir bileşen, Arduino’dan komut alarak çalıştığı için bağlı olduğu pin OUTPUT modunda ayarlanır."
+            },
+            {
+                id: 8,
+                question: "Arduino’da bir butonun durumu nasıl okunur?",
+                options: [
+                    "a) digitalRead()",
+                    "b) digitalWrite()",
+                    "c) analogWrite()",
+                    "d) Serial.print()"
+                ],
+                correct: "a",
+                explanation: "digitalRead() fonksiyonu, bir dijital pinin durumunu (HIGH veya LOW) okur. Butonun basılı olup olmadığını kontrol etmek için kullanılır."
+            },
+            {
+                id: 9,
+                question: "Arduino’da 'setup()' fonksiyonu ne için kullanılır?",
+                options: [
+                    "a) Sürekli çalışan kodları yazmak",
+                    "b) İlk ayarları yapmak",
+                    "c) Sensör verisi okumak",
+                    "d) Programı durdurmak"
+                ],
+                correct: "b",
+                explanation: "setup() fonksiyonu, Arduino programının başlangıcında bir kez çalışır ve pin modları, seri iletişim gibi ilk ayarları yapmak için kullanılır."
+            },
+            {
+                id: 10,
+                question: "Arduino’da 'loop()' fonksiyonu ne yapar?",
+                options: [
+                    "a) Programı bir kez çalıştırır",
+                    "b) Programı sürekli tekrarlar",
+                    "c) Pini giriş olarak ayarlar",
+                    "d) LED’i yakar"
+                ],
+                correct: "b",
+                explanation: "loop() fonksiyonu, Arduino programının ana döngüsüdür ve içindeki kodlar sürekli olarak tekrar tekrar çalışır."
+            },
+            {
+                id: 11,
+                question: "Arduino’da GND ne anlama gelir?",
+                options: [
+                    "a) Güç kaynağı",
+                    "b) Toprak (Ground)",
+                    "c) Dijital pin",
+                    "d) Analog pin"
+                ],
+                correct: "b",
+                explanation: "GND, devrenin toprak bağlantısını temsil eder. Tüm bileşenlerin ortak bir referans noktasıdır."
+            },
+            {
+                id: 12,
+                question: "Arduino Uno’da kaç tane dijital pin bulunur?",
+                options: [
+                    "a) 6",
+                    "b) 14",
+                    "c) 20",
+                    "d) 8"
+                ],
+                correct: "b",
+                explanation: "Arduino Uno’da 14 dijital pin bulunur (0’dan 13’e kadar numaralandırılır)."
+            },
+            {
+                id: 13,
+                question: "Arduino’da bir LED’in anot ucu nereye bağlanır?",
+                options: [
+                    "a) GND’ye",
+                    "b) Dijital pine",
+                    "c) 5V’a",
+                    "d) Dirence"
+                ],
+                correct: "b",
+                explanation: "LED’in anot (uzun bacak) ucu, Arduino’nun dijital pinine bağlanır. Katot (kısa bacak) ise bir direnç üzerinden GND’ye bağlanır."
+            },
+            {
+                id: 14,
+                question: "Arduino’da bir direnç neden kullanılır?",
+                options: [
+                    "a) LED’in parlaklığını artırmak",
+                    "b) Akımı sınırlamak",
+                    "c) Pini kapatmak",
+                    "d) Sensör verisi okumak"
+                ],
+                correct: "b",
+                explanation: "Direnç, LED gibi bileşenlere fazla akım giderek zarar görmesini önlemek için kullanılır."
+            },
+            {
+                id: 15,
+                question: "Arduino’da seri monitör ne için kullanılır?",
+                options: [
+                    "a) LED yakmak",
+                    "b) Sensör verilerini görmek",
+                    "c) Program yazmak",
+                    "d) Pini ayarlamak"
+                ],
+                correct: "b",
+                explanation: "Seri monitör, Arduino’nun gönderdiği verileri (örneğin, sensör okumaları) bilgisayarda görüntülemek için kullanılır."
+            },
+            {
+                id: 16,
+                question: "Arduino’da seri iletişimi başlatmak için hangi komut kullanılır?",
+                options: [
+                    "a) Serial.begin()",
+                    "b) Serial.print()",
+                    "c) digitalWrite()",
+                    "d) delay()"
+                ],
+                correct: "a",
+                explanation: "Serial.begin() fonksiyonu, Arduino ile bilgisayar arasındaki seri iletişimi başlatır. Genellikle 9600 baud hızıyla kullanılır."
+            },
+            {
+                id: 17,
+                question: "Arduino’da bir sensörden analog veri okumak için hangi komut kullanılır?",
+                options: [
+                    "a) digitalRead()",
+                    "b) analogRead()",
+                    "c) digitalWrite()",
+                    "d) analogWrite()"
+                ],
+                correct: "b",
+                explanation: "analogRead() fonksiyonu, analog pinlerden (A0-A5) 0 ile 1023 arasında bir değer okur."
+            },
+            {
+                id: 18,
+                question: "Arduino’da PWM ne anlama gelir?",
+                options: [
+                    "a) Programlama dili",
+                    "b) Pulse Width Modulation (Darbe Genişlik Modülasyonu)",
+                    "c) Pinin güç seviyesi",
+                    "d) Sensör tipi"
+                ],
+                correct: "b",
+                explanation: "PWM, bir pinin çıkış gücünü (örneğin, LED parlaklığı veya motor hızı) kontrol etmek için kullanılan bir tekniktir."
+            },
+            {
+                id: 19,
+                question: "Arduino’da PWM hangi komutla kullanılır?",
+                options: [
+                    "a) digitalWrite()",
+                    "b) analogWrite()",
+                    "c) analogRead()",
+                    "d) Serial.begin()"
+                ],
+                correct: "b",
+                explanation: "analogWrite() fonksiyonu, PWM destekli pinlerde 0-255 arasında bir değerle çıkış sinyalini ayarlar."
+            },
+            {
+                id: 20,
+                question: "Arduino Uno’da hangi pinler PWM destekler?",
+                options: [
+                    "a) 2, 4, 6",
+                    "b) 3, 5, 6, 9, 10, 11",
+                    "c) 0, 1, 2",
+                    "d) A0, A1, A2"
+                ],
+                correct: "b",
+                explanation: "Arduino Uno’da PWM destekli pinler 3, 5, 6, 9, 10 ve 11 numaralı pinlerdir."
+            },
+            {
+                id: 21,
+                question: "Arduino’da bir motoru çalıştırmak için hangi bileşen kullanılır?",
+                options: [
+                    "a) LED",
+                    "b) Motor sürücü",
+                    "c) Direnç",
+                    "d) Buton"
+                ],
+                correct: "b",
+                explanation: "Motorlar yüksek akım çeker, bu yüzden Arduino’nun pinleri yerine motor sürücü (örneğin, L298N) kullanılır."
+            },
+            {
+                id: 22,
+                question: "Arduino’da bir ifadenin doğru olup olmadığını kontrol etmek için hangi yapı kullanılır?",
+                options: [
+                    "a) if",
+                    "b) loop",
+                    "c) delay",
+                    "d) setup"
+                ],
+                correct: "a",
+                explanation: "if yapısı, bir koşulun doğru olup olmadığını kontrol eder ve doğruysa belirli bir kod bloğunu çalıştırır."
+            },
+            {
+                id: 23,
+                question: "Arduino’da bir butona basıldığında LED yakmak için hangi yapı kullanılır?",
+                options: [
+                    "a) digitalWrite()",
+                    "b) if-else",
+                    "c) Serial.begin()",
+                    "d) delay()"
+                ],
+                correct: "b",
+                explanation: "Butonun durumunu kontrol etmek için if-else yapısı kullanılır. Örneğin, buton basılıysa LED yakılır, değilse söndürülür."
+            },
+            {
+                id: 24,
+                question: "Arduino’da bir değişken nasıl tanımlanır?",
+                options: [
+                    "a) int sayi = 10;",
+                    "b) digitalWrite(sayi, 10);",
+                    "c) delay(10);",
+                    "d) Serial.print(10);"
+                ],
+                correct: "a",
+                explanation: "Değişken tanımlamak için veri tipi (örneğin, int) ve değişken adı kullanılır. Örnek: int sayi = 10;"
+            },
+            {
+                id: 25,
+                question: "Arduino’da hangi veri tipi bir ondalık sayıyı temsil eder?",
+                options: [
+                    "a) int",
+                    "b) float",
+                    "c) char",
+                    "d) boolean"
+                ],
+                correct: "b",
+                explanation: "float veri tipi, ondalık sayıları (örneğin, 3.14) temsil eder."
+            },
+            {
+                id: 26,
+                question: "Arduino’da bir döngü oluşturmak için hangi yapı kullanılır?",
+                options: [
+                    "a) if",
+                    "b) for",
+                    "c) setup",
+                    "d) delay"
+                ],
+                correct: "b",
+                explanation: "for döngüsü, belirli bir sayıda tekrar eden işlemler için kullanılır. Örneğin, bir LED’i 10 kez yakıp söndürmek için."
+            },
+            {
+                id: 27,
+                question: "Arduino’da bir sensörün bağlı olduğu pin hangi modda olmalıdır?",
+                options: [
+                    "a) OUTPUT",
+                    "b) INPUT",
+                    "c) PWM",
+                    "d) GND"
+                ],
+                correct: "b",
+                explanation: "Sensörler veri gönderdiği için bağlı oldukları pin INPUT modunda ayarlanır."
+            },
+            {
+                id: 28,
+                question: "Arduino’da bir LED’in parlaklığını ayarlamak için hangi komut kullanılır?",
+                options: [
+                    "a) digitalWrite()",
+                    "b) analogWrite()",
+                    "c) digitalRead()",
+                    "d) delay()"
+                ],
+                correct: "b",
+                explanation: "LED’in parlaklığını ayarlamak için PWM pinlerinde analogWrite() kullanılır."
+            },
+            {
+                id: 29,
+                question: "Arduino’da hangi pinler analog veri okuyabilir?",
+                options: [
+                    "a) 0-13",
+                    "b) A0-A5",
+                    "c) 3, 5, 6",
+                    "d) GND, 5V"
+                ],
+                correct: "b",
+                explanation: "Arduino Uno’da analog veri okumak için A0’dan A5’e kadar olan analog pinler kullanılır."
+            },
+            {
+                id: 30,
+                question: "Arduino’da bir programın sonsuz döngüye girmesini hangi fonksiyon sağlar?",
+                options: [
+                    "a) setup()",
+                    "b) loop()",
+                    "c) delay()",
+                    "d) if()"
+                ],
+                correct: "b",
+                explanation: "loop() fonksiyonu, programın sürekli çalışmasını sağlar."
+            },
+            {
+                id: 31,
+                question: "Arduino’da bir LED’in bağlı olduğu devrede direnç kullanılmazsa ne olur?",
+                options: [
+                    "a) LED daha parlak yanar",
+                    "b) LED yanmaz",
+                    "c) LED zarar görür",
+                    "d) Arduino kapanır"
+                ],
+                correct: "c",
+                explanation: "Direnç olmazsa, LED’e fazla akım gider ve bu, LED’in yanmasına veya zarar görmesine neden olur."
+            },
+            {
+                id: 32,
+                question: "Arduino’da bir butonun durumu HIGH ise ne anlama gelir?",
+                options: [
+                    "a) Buton basılıdır",
+                    "b) Buton basılı değildir",
+                    "c) LED yanıyordur",
+                    "d) Program durmuştur"
+                ],
+                correct: "a",
+                explanation: "Buton basıldığında genellikle HIGH (5V) sinyali üretilir, bu da basılı olduğunu gösterir."
+            },
+            {
+                id: 33,
+                question: "Arduino’da bir programın çalışmasını durdurmak için hangi komut kullanılır?",
+                options: [
+                    "a) delay()",
+                    "b) while(true) {}",
+                    "c) digitalWrite()",
+                    "d) Serial.begin()"
+                ],
+                correct: "b",
+                explanation: "while(true) {} yapısı, programın sonsuz bir döngüde kalmasını sağlar ve çalışmayı durdurur."
+            },
+            {
+                id: 34,
+                question: "Arduino’da bir sensörden okunan veri hangi aralıkta olur?",
+                options: [
+                    "a) 0-255",
+                    "b) 0-1023",
+                    "c) 0-5",
+                    "d) 0-100"
+                ],
+                correct: "b",
+                explanation: "Analog sensörlerden okunan veri, 10-bit çözünürlükle 0 ile 1023 arasında bir değerdir."
+            },
+            {
+                id: 35,
+                question: "Arduino’da bir LED’in yanıp sönmesi için hangi yapı kullanılır?",
+                options: [
+                    "a) if-else",
+                    "b) delay()",
+                    "c) for",
+                    "d) loop()"
+                ],
+                correct: "b",
+                explanation: "LED’in yanıp sönmesi için digitalWrite() ile LED açılıp kapanır ve delay() ile bekleme süreleri ayarlanır."
+            },
+            {
+                id: 36,
+                question: "Arduino’da bir değişkenin değerini seri monitöre yazdırmak için hangi komut kullanılır?",
+                options: [
+                    "a) Serial.print()",
+                    "b) digitalWrite()",
+                    "c) analogRead()",
+                    "d) delay()"
+                ],
+                correct: "a",
+                explanation: "Serial.print() fonksiyonu, bir değişkenin veya metnin seri monitöre yazılmasını sağlar."
+            },
+            {
+                id: 37,
+                question: "Arduino’da hangi bileşen bir devrenin açılıp kapanmasını sağlar?",
+                options: [
+                    "a) LED",
+                    "b) Buton",
+                    "c) Direnç",
+                    "d) Sensör"
+                ],
+                correct: "b",
+                explanation: "Buton, bir devrenin açılıp kapanmasını kontrol eden bir anahtar gibi çalışır."
+            },
+            {
+                id: 38,
+                question: "Arduino’da bir motorun hızını ayarlamak için hangi komut kullanılır?",
+                options: [
+                    "a) digitalWrite()",
+                    "b) analogWrite()",
+                    "c) digitalRead()",
+                    "d) Serial.print()"
+                ],
+                correct: "b",
+                explanation: "Motorun hızını ayarlamak için PWM pinlerinde analogWrite() kullanılır."
+            },
+            {
+                id: 39,
+                question: "Arduino’da bir programın yalnızca bir kez çalışmasını hangi fonksiyon sağlar?",
+                options: [
+                    "a) loop()",
+                    "b) setup()",
+                    "c) delay()",
+                    "d) if()"
+                ],
+                correct: "b",
+                explanation: "setup() fonksiyonu, programın başlangıcında yalnızca bir kez çalışır."
+            },
+            {
+                id: 40,
+                question: "Arduino’da bir LED’in bağlı olduğu pin hangi değere ayarlanırsa LED söner?",
+                options: [
+                    "a) HIGH",
+                    "b) LOW",
+                    "c) 255",
+                    "d) 1023"
+                ],
+                correct: "b",
+                explanation: "LED’in bağlı olduğu pin LOW (0V) yapılırsa LED söner."
+            },
+            {
+                id: 41,
+                question: "Arduino’da bir sensörün bağlı olduğu pin hangi modda olmalıdır?",
+                options: [
+                    "a) OUTPUT",
+                    "b) INPUT",
+                    "c) PWM",
+                    "d) GND"
+                ],
+                correct: "b",
+                explanation: "Sensörler veri gönderdiği için bağlı oldukları pin INPUT modunda ayarlanır."
+            },
+            {
+                id: 42,
+                question: "Arduino’da bir programın hata ayıklaması için hangi araç kullanılır?",
+                options: [
+                    "a) Seri monitör",
+                    "b) LED",
+                    "c) Buton",
+                    "d) Direnç"
+                ],
+                correct: "a",
+                explanation: "Seri monitör, programın çalışmasını izlemek ve hata ayıklamak için kullanılır."
+            },
+            {
+                id: 43,
+                question: "Arduino’da bir değişkenin değerini artırmak için hangi operatör kullanılır?",
+                options: [
+                    "a) ++",
+                    "b) --",
+                    "c) ==",
+                    "d) !="
+                ],
+                correct: "a",
+                explanation: "++ operatörü, bir değişkenin değerini 1 artırır (örneğin, sayi++)."
+            },
+            {
+                id: 44,
+                question: "Arduino’da bir LED’in bağlı olduğu devrede hangi bileşen akımı sınırlar?",
+                options: [
+                    "a) Direnç",
+                    "b) Buton",
+                    "c) Sensör",
+                    "d) Motor"
+                ],
+                correct: "a",
+                explanation: "Direnç, LED’e fazla akım giderek zarar görmesini önler."
+            },
+            {
+                id: 45,
+                question: "Arduino’da bir programın belirli bir süre çalışmasını sağlamak için hangi komut kullanılır?",
+                options: [
+                    "a) delay()",
+                    "b) digitalWrite()",
+                    "c) Serial.print()",
+                    "d) analogRead()"
+                ],
+                correct: "a",
+                explanation: "delay() fonksiyonu, programın belirtilen süre boyunca beklemesini sağlar."
+            },
+            {
+                id: 46,
+                question: "Arduino’da bir sensörden okunan veriyi nasıl görselleştiririz?",
+                options: [
+                    "a) Seri monitör",
+                    "b) LED",
+                    "c) Buton",
+                    "d) Direnç"
+                ],
+                correct: "a",
+                explanation: "Sensörden okunan veriler, Serial.print() ile seri monitöre yazılarak görselleştirilir."
+            },
+            {
+                id: 47,
+                question: "Arduino’da bir değişkenin değeri 0 ise hangi koşul kullanılır?",
+                options: [
+                    "a) if (deger == 0)",
+                    "b) if (deger != 0)",
+                    "c) if (deger > 0)",
+                    "d) if (deger < 0)"
+                ],
+                correct: "a",
+                explanation: "== operatörü, bir değişkenin belirli bir değere eşit olup olmadığını kontrol eder."
+            },
+            {
+                id: 48,
+                question: "Arduino’da bir LED’in yanıp sönme süresi nasıl ayarlanır?",
+                options: [
+                    "a) delay()",
+                    "b) digitalWrite()",
+                    "c) analogWrite()",
+                    "d) Serial.print()"
+                ],
+                correct: "a",
+                explanation: "delay() fonksiyonu, LED’in yanıp sönme süresini (örneğin, 500 ms açık, 500 ms kapalı) ayarlar."
+            },
+            {
+                id: 49,
+                question: "Arduino’da bir programın sürekli çalışmasını hangi fonksiyon sağlar?",
+                options: [
+                    "a) setup()",
+                    "b) loop()",
+                    "c) delay()",
+                    "d) if()"
+                ],
+                correct: "b",
+                explanation: "loop() fonksiyonu, programın sürekli çalışmasını sağlar."
+            },
+            {
+                id: 50,
+                question: "Arduino’da bir butonun basılı olup olmadığını nasıl kontrol ederiz?",
+                options: [
+                    "a) digitalRead()",
+                    "b) digitalWrite()",
+                    "c) analogWrite()",
+                    "d) Serial.print()"
+                ],
+                correct: "a",
+                explanation: "digitalRead() fonksiyonu, butonun bağlı olduğu pinin durumunu (HIGH veya LOW) okuyarak basılı olup olmadığını kontrol eder."
+            }
+        ];
+
+        // Dinamik olarak soruları oluştur
+        const quizForm = document.getElementById('quizForm');
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `q${index + 1}`;
+            questionDiv.innerHTML = `
+                <h3>${q.id}. ${q.question}</h3>
+                <div class="options">
+                    ${q.options.map(opt => `<label><input type="radio" name="q${index + 1}" value="${opt[0]}"> ${opt}</label>`).join('')}
+                </div>
+                <div class="question-summary" id="summary${index + 1}"></div>
+            `;
+            quizForm.insertBefore(questionDiv, document.getElementById('submitExam'));
+        });
+
+        // Sınavı bitirme, puan hesaplama ve her sorunun altında özet gösterimi
+        document.getElementById('submitExam').addEventListener('click', () => {
+            let score = 0;
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+                const selectedOption = selected ? questions[index].options.find(opt => opt.startsWith(selected.value)) : "Cevap seçilmedi";
+                const correctOption = questions[index].options.find(opt => opt.startsWith(q.correct));
+                const isCorrect = selected && selected.value === q.correct;
+
+                if (isCorrect) {
+                    score += 2; // Her doğru cevap 2 puan
+                }
+
+                // Her sorunun altında özet göster
+                const summaryDiv = document.getElementById(`summary${index + 1}`);
+                summaryDiv.className = `question-summary ${isCorrect ? 'correct' : 'incorrect'}`;
+                summaryDiv.innerHTML = `
+                    <p><strong>Seçtiğiniz cevap:</strong> ${selectedOption}</p>
+                    <p><strong>Doğru cevap:</strong> ${correctOption}</p>
+                    <p><strong>Durum:</strong> <span class="summary-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Doğru' : 'Yanlış'}</span></p>
+                    <p><strong>Çözüm:</strong> ${q.explanation}</p>
+                `;
+                summaryDiv.style.display = 'block';
+            });
+
+            // Puanı göster
+            document.getElementById('score').innerHTML = `Toplam Puanınız: ${score} / 100`;
+
+            // Sayfayı en üste kaydır
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
