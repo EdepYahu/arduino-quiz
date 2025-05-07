@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temel Elektrik-Elektronik Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .question {
+            background: #f8fafc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .question:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .question h3 {
+            margin: 0 0 15px;
+            color: #1e3a8a;
+            font-size: 1.3em;
+        }
+        .options label {
+            display: block;
+            padding: 12px;
+            margin: 5px 0;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background: #cbd5e1;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-summary {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 4px solid;
+            border-radius: 8px;
+        }
+        .question-summary.correct {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+        .question-summary.incorrect {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .question-summary p {
+            margin: 5px 0;
+        }
+        .summary-status {
+            font-weight: bold;
+        }
+        .summary-status.correct {
+            color: #10b981;
+        }
+        .summary-status.incorrect {
+            color: #ef4444;
+        }
+        #submitExam {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #submitExam:hover {
+            background: #1e40af;
+        }
+        #score {
+            text-align: center;
+            font-size: 1.4em;
+            color: #1e3a8a;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .question h3 {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>6. Sınıf Temel Elektrik-Elektronik Deneme Sınavı</h1>
+        <form id="quizForm">
+            <!-- Sorular dinamik olarak burada oluşturulacak -->
+            <button type="button" id="submitExam">Sınavı Bitir</button>
+        </form>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Sorular JSON formatında
+        const questions = [
+            {
+                id: 1,
+                question: "Elektrik nedir?",
+                options: [
+                    "a) Maddenin hareketi",
+                    "b) Ses dalgaları",
+                    "c) Elektronların hareketi",
+                    "d) Işık enerjisi"
+                ],
+                correct: "c",
+                explanation: "Elektrik, elektronların (negatif yüklü parçacıkların) hareketiyle oluşan bir enerji türüdür. Örneğin, bir kablo içinde elektronlar hareket ettiğinde elektrik akımı oluşur."
+            },
+            {
+                id: 2,
+                question: "Bir elektrik devresinde enerjiyi sağlayan eleman nedir?",
+                options: [
+                    "a) Kablo",
+                    "b) Pil",
+                    "c) Ampul",
+                    "d) Anahtar"
+                ],
+                correct: "b",
+                explanation: "Pil, elektrik devresine enerji sağlar. İçindeki kimyasal enerjiyi elektrik enerjisine dönüştürerek devreyi çalıştırır."
+            },
+            {
+                id: 3,
+                question: "Elektrik devresinde akımın geçtiği yollara ne denir?",
+                options: [
+                    "a) Direnç",
+                    "b) Kablo",
+                    "c) Lamba",
+                    "d) Pil"
+                ],
+                correct: "b",
+                explanation: "Kablolar, elektrik akımının devre boyunca hareket ettiği iletken yollardır. Genellikle bakır gibi iletken malzemelerden yapılır."
+            },
+            {
+                id: 4,
+                question: "Elektriği ileten maddelere ne denir?",
+                options: [
+                    "a) Yalıtkan",
+                    "b) İletken",
+                    "c) Direnç",
+                    "d) Devre"
+                ],
+                correct: "b",
+                explanation: "İletken maddeler, elektriği kolayca geçiren maddelerdir. Örneğin, bakır ve alüminyum iletkendir."
+            },
+            {
+                id: 5,
+                question: "Aşağıdaki maddelerden hangisi yalıtkandır?",
+                options: [
+                    "a) Bakır",
+                    "b) Plastik",
+                    "c) Gümüş",
+                    "d) Alüminyum"
+                ],
+                correct: "b",
+                explanation: "Yalıtkan maddeler, elektriği geçirmez. Plastik, yalıtkan bir malzemedir ve kabloların dış kaplamasında kullanılır."
+            },
+            {
+                id: 6,
+                question: "Bir elektrik devresinde anahtarın görevi nedir?",
+                options: [
+                    "a) Elektrik üretmek",
+                    "b) Devreyi açıp kapatmak",
+                    "c) Işık yaymak",
+                    "d) Akımı artırmak"
+                ],
+                correct: "b",
+                explanation: "Anahtar, elektrik devresini açıp kapatarak akımın akmasını veya durmasını kontrol eder."
+            },
+            {
+                id: 7,
+                question: "Ampulün devrede çalışması için ne gereklidir?",
+                options: [
+                    "a) Elektrik akımı",
+                    "b) Ses dalgaları",
+                    "c) Işık enerjisi",
+                    "d) Hava"
+                ],
+                correct: "a",
+                explanation: "Ampul, elektrik akımı geçtiğinde içindeki telin ısınmasıyla ışık üretir. Akım olmazsa ampul yanmaz."
+            },
+            {
+                id: 8,
+                question: "Bir devrede pilin artı (+) ucu nereye bağlanır?",
+                options: [
+                    "a) Ampulün eksi ucuna",
+                    "b) Devrenin başlangıcına",
+                    "c) Anahtarın ortasına",
+                    "d) Kablonun sonuna"
+                ],
+                correct: "b",
+                explanation: "Pilin artı (+) ucu, devrenin başlangıcına bağlanır ve elektrik akımı buradan devreye girer."
+            },
+            {
+                id: 9,
+                question: "LED nedir?",
+                options: [
+                    "a) Bir tür kablo",
+                    "b) Işık yayan diyot",
+                    "c) Elektrik pili",
+                    "d) Anahtar tipi"
+                ],
+                correct: "b",
+                explanation: "LED (Light Emitting Diode), elektrik akımı geçtiğinde ışık yayan bir elektronik bileşendir. Az enerji kullanır ve uzun ömürlüdür."
+            },
+            {
+                id: 10,
+                question: "Bir devrede direnç ne yapar?",
+                options: [
+                    "a) Elektrik akımını artırır",
+                    "b) Elektrik akımını azaltır",
+                    "c) Işık üretir",
+                    "d) Devreyi açar"
+                ],
+                correct: "b",
+                explanation: "Direnç, elektrik akımını sınırlandırır ve bileşenlerin (örneğin, LED) fazla akımdan zarar görmesini önler."
+            },
+            {
+                id: 11,
+                question: "Aşağıdakilerden hangisi bir elektrik devresinde bulunmaz?",
+                options: [
+                    "a) Pil",
+                    "b) Kablo",
+                    "c) Ampul",
+                    "d) Kağıt"
+                ],
+                correct: "d",
+                explanation: "Kağıt, elektrik devresinde kullanılmaz çünkü yalıtkandır ve elektriği geçirmez."
+            },
+            {
+                id: 12,
+                question: "Elektrik akımının birimi nedir?",
+                options: [
+                    "a) Volt",
+                    "b) Amper",
+                    "c) Watt",
+                    "d) Ohm"
+                ],
+                correct: "b",
+                explanation: "Elektrik akımının birimi Amper’dir. Akımın ne kadar güçlü olduğunu gösterir."
+            },
+            {
+                id: 13,
+                question: "Bir devrede LED’in uzun bacağı nereye bağlanır?",
+                options: [
+                    "a) Pildeki eksi uca",
+                    "b) Dirence",
+                    "c) Pildeki artı uca",
+                    "d) Anahtara"
+                ],
+                correct: "c",
+                explanation: "LED’in uzun bacağı (anot), pilin artı (+) ucuna veya devrenin pozitif tarafına bağlanır."
+            },
+            {
+                id: 14,
+                question: "Elektrik devresinde kısa devre ne demektir?",
+                options: [
+                    "a) Devrenin çok uzun olması",
+                    "b) Akımın yanlış yoldan akması",
+                    "c) Ampulün yanması",
+                    "d) Pildeki enerjinin artması"
+                ],
+                correct: "b",
+                explanation: "Kısa devre, elektrik akımının yanlış bir yoldan (örneğin, bileşenleri atlayarak) akmasıdır. Bu, devreye zarar verebilir."
+            },
+            {
+                id: 15,
+                question: "Aşağıdaki araçlardan hangisi elektrikle çalışmaz?",
+                options: [
+                    "a) Televizyon",
+                    "b) El feneri",
+                    "c) Bisiklet",
+                    "d) Bilgisayar"
+                ],
+                correct: "c",
+                explanation: "Bisiklet, elektrikle değil, insan gücüyle çalışır. Diğer araçlar elektrik enerjisi kullanır."
+            },
+            {
+                id: 16,
+                question: "Bir devrede kablolar neden yalıtkan bir kaplamayla sarılır?",
+                options: [
+                    "a) Daha güzel görünmesi için",
+                    "b) Elektrik çarpmasını önlemek için",
+                    "c) Akımı artırmak için",
+                    "d) Devreyi yavaşlatmak için"
+                ],
+                correct: "b",
+                explanation: "Kabloların yalıtkan kaplaması (örneğin, plastik), elektrik çarpmasını ve kısa devreyi önler."
+            },
+            {
+                id: 17,
+                question: "Bir elektrik devresinde seri bağlantı ne demektir?",
+                options: [
+                    "a) Bileşenlerin yan yana bağlanması",
+                    "b) Bileşenlerin tek bir yol üzerinde bağlanması",
+                    "c) Devrenin çok kısa olması",
+                    "d) Pillerin ayrı ayrı bağlanması"
+                ],
+                correct: "b",
+                explanation: "Seri bağlantıda, bileşenler (örneğin, ampuller) tek bir yol üzerinde bağlanır. Akım hepsinden sırayla geçer."
+            },
+            {
+                id: 18,
+                question: "Paralel bağlantıda bir ampul sönerse ne olur?",
+                options: [
+                    "a) Tüm ampuller söner",
+                    "b) Diğer ampuller yanmaya devam eder",
+                    "c) Devre kısa devre yapar",
+                    "d) Pil biter"
+                ],
+                correct: "b",
+                explanation: "Paralel bağlantıda, her ampul kendi yoluna sahiptir. Bir ampul sönerse, diğerleri çalışmaya devam eder."
+            },
+            {
+                id: 19,
+                question: "Elektrik enerjisi hangi enerji türüne dönüştürülebilir?",
+                options: [
+                    "a) Işık enerjisi",
+                    "b) Ses enerjisi",
+                    "c) Isı enerjisi",
+                    "d) Hepsi"
+                ],
+                correct: "d",
+                explanation: "Elektrik enerjisi, ışığa (ampul), sese (hoparlör) veya ısıya (soba) dönüştürülebilir."
+            },
+            {
+                id: 20,
+                question: "Bir devrede volt neyi ölçer?",
+                options: [
+                    "a) Akımın hızını",
+                    "b) Elektrik enerjisinin gücünü",
+                    "c) Direnci",
+                    "d) Kablonun uzunluğunu"
+                ],
+                correct: "b",
+                explanation: "Volt, elektrik enerjisinin gücünü (gerilim) ölçer. Örneğin, bir pilin kaç volt olduğu, enerjisinin gücünü gösterir."
+            },
+            {
+                id: 21,
+                question: "Aşağıdaki araçlardan hangisi elektrik üretir?",
+                options: [
+                    "a) Lamba",
+                    "b) Dinamo",
+                    "c) Anahtar",
+                    "d) Kablo"
+                ],
+                correct: "b",
+                explanation: "Dinamo, mekanik enerjiyi (örneğin, bisiklet pedalından) elektrik enerjisine dönüştürür."
+            },
+            {
+                id: 22,
+                question: "Bir devrede iki pil seri bağlanırsa ne olur?",
+                options: [
+                    "a) Gerilim artar",
+                    "b) Gerilim azalır",
+                    "c) Akım durur",
+                    "d) Devre kapanır"
+                ],
+                correct: "a",
+                explanation: "Seri bağlı pillerde gerilim (volt) toplanır. Örneğin, iki 1.5V pil seri bağlanırsa toplam 3V olur."
+            },
+            {
+                id: 23,
+                question: "Aşağıdakilerden hangisi bir iletken maddedir?",
+                options: [
+                    "a) Cam",
+                    "b) Plastik",
+                    "c) Demir",
+                    "d) Kauçuk"
+                ],
+                correct: "c",
+                explanation: "Demir, elektriği iyi ileten bir metaldir ve iletken bir maddedir."
+            },
+            {
+                id: 24,
+                question: "Bir elektrik devresinde lamba neden yanmaz?",
+                options: [
+                    "a) Devre açıksa",
+                    "b) Kablo çok uzunsa",
+                    "c) Pil çok büyükse",
+                    "d) Anahtar kapalıysa"
+                ],
+                correct: "a",
+                explanation: "Devre açık (anahtar kapalı veya bağlantı kopuk) olduğunda akım akmaz, bu yüzden lamba yanmaz."
+            },
+            {
+                id: 25,
+                question: "Ohm neyi ölçer?",
+                options: [
+                    "a) Gerilimi",
+                    "b) Akımı",
+                    "c) Direnci",
+                    "d) Gücü"
+                ],
+                correct: "c",
+                explanation: "Ohm, bir devredeki direnci ölçer. Direnç, akımın ne kadar zorlandığını gösterir."
+            },
+            {
+                id: 26,
+                question: "Bir devrede LED’in kısa bacağı nereye bağlanır?",
+                options: [
+                    "a) Pildeki artı uca",
+                    "b) Dirence veya eksi uca",
+                    "c) Anahtara",
+                    "d) Kablonun ortasına"
+                ],
+                correct: "b",
+                explanation: "LED’in kısa bacağı (katot), direnç üzerinden pilin eksi (-) ucuna bağlanır."
+            },
+            {
+                id: 27,
+                question: "Aşağıdakilerden hangisi elektrik devresinde enerji tüketen bir elemandır?",
+                options: [
+                    "a) Pil",
+                    "b) Kablo",
+                    "c) Ampul",
+                    "d) Anahtar"
+                ],
+                correct: "c",
+                explanation: "Ampul, elektrik enerjisini ışığa ve ısıya dönüştürerek enerji tüketir."
+            },
+            {
+                id: 28,
+                question: "Bir devrede iki ampul paralel bağlanırsa ne olur?",
+                options: [
+                    "a) Ampuller daha az ışık verir",
+                    "b) Ampuller aynı parlaklıkta yanar",
+                    "c) Ampuller sırayla yanar",
+                    "d) Devre kapanır"
+                ],
+                correct: "b",
+                explanation: "Paralel bağlantıda her ampul aynı gerilimi alır, bu yüzden aynı parlaklıkta yanar."
+            },
+            {
+                id: 29,
+                question: "Elektrik çarpmasını önlemek için ne yapılmalıdır?",
+                options: [
+                    "a) Kabloları açıkta bırakmak",
+                    "b) Islak elle prize dokunmak",
+                    "c) Yalıtkan eldiven kullanmak",
+                    "d) Devreyi açık tutmak"
+                ],
+                correct: "c",
+                explanation: "Yalıtkan eldiven, elektriğin vücudunuza geçmesini engeller ve çarpmayı önler."
+            },
+            {
+                id: 30,
+                question: "Bir devrede kablo yerine tahta kullanılsaydı ne olurdu?",
+                options: [
+                    "a) Devre çalışırdı",
+                    "b) Devre çalışmazdı",
+                    "c) Ampul daha parlak yanardı",
+                    "d) Pil biterdi"
+                ],
+                correct: "b",
+                explanation: "Tahta yalıtkandır ve elektriği geçirmez. Bu yüzden devre çalışmaz."
+            },
+            {
+                id: 31,
+                question: "Bir elektrik devresinde akım hangi yönde akar?",
+                options: [
+                    "a) Artıdan eksiye",
+                    "b) Eksiden artıya",
+                    "c) Her iki yönde",
+                    "d) Hiçbir yönde"
+                ],
+                correct: "a",
+                explanation: "Elektrik akımı, devrede pilin artı (+) ucundan eksi (-) ucuna doğru akar."
+            },
+            {
+                id: 32,
+                question: "Aşağıdakilerden hangisi bir elektrik devresinde olmazsa devre çalışmaz?",
+                options: [
+                    "a) Pil",
+                    "b) Direnç",
+                    "c) LED",
+                    "d) Kablo"
+                ],
+                correct: "a",
+                explanation: "Pil, devreye enerji sağlar. Pil olmazsa devre çalışmaz."
+            },
+            {
+                id: 33,
+                question: "Bir devrede iki pil paralel bağlanırsa ne olur?",
+                options: [
+                    "a) Gerilim artar",
+                    "b) Gerilim aynı kalır",
+                    "c) Akım durur",
+                    "d) Devre kapanır"
+                ],
+                correct: "b",
+                explanation: "Paralel bağlı pillerde gerilim aynı kalır, ancak pil ömrü uzar."
+            },
+            {
+                id: 34,
+                question: "Bir devrede direnç artarsa ne olur?",
+                options: [
+                    "a) Akım artar",
+                    "b) Akım azalır",
+                    "c) Gerilim azalır",
+                    "d) Devre kapanır"
+                ],
+                correct: "b",
+                explanation: "Direnç artarsa, akımın geçişi zorlaşır ve akım azalır."
+            },
+            {
+                id: 35,
+                question: "Aşağıdakilerden hangisi elektrik devresinde güvenlik için kullanılır?",
+                options: [
+                    "a) Sigorta",
+                    "b) Ampul",
+                    "c) Kablo",
+                    "d) Pil"
+                ],
+                correct: "a",
+                explanation: "Sigorta, fazla akım geçtiğinde devreyi keserek güvenliği sağlar."
+            },
+            {
+                id: 36,
+                question: "Bir devrede ampulün parlaklığını ne etkiler?",
+                options: [
+                    "a) Pilin gerilimi",
+                    "b) Kablonun rengi",
+                    "c) Anahtarın boyutu",
+                    "d) Devrenin şekli"
+                ],
+                correct: "a",
+                explanation: "Pilin gerilimi (volt) artarsa, ampul daha parlak yanar."
+            },
+            {
+                id: 37,
+                question: "Aşağıdaki maddelerden hangisi iletkendir?",
+                options: [
+                    "a) Kuru tahta",
+                    "b) Altın",
+                    "c) Plastik",
+                    "d) Cam"
+                ],
+                correct: "b",
+                explanation: "Altın, elektriği çok iyi ileten bir metaldir ve iletkendir."
+            },
+            {
+                id: 38,
+                question: "Bir devrede açık devre ne demektir?",
+                options: [
+                    "a) Akımın aktığı bir devre",
+                    "b) Akımın akmadığı bir devre",
+                    "c) Devrenin çok uzun olması",
+                    "d) Devrenin kısa olması"
+                ],
+                correct: "b",
+                explanation: "Açık devrede bağlantı kopuktur (örneğin, anahtar açık), bu yüzden akım akmaz."
+            },
+            {
+                id: 39,
+                question: "Bir devrede kapalı devre ne demektir?",
+                options: [
+                    "a) Akımın akmadığı bir devre",
+                    "b) Akımın aktığı bir devre",
+                    "c) Devrenin kısa olması",
+                    "d) Devrenin açık olması"
+                ],
+                correct: "b",
+                explanation: "Kapalı devrede bağlantı tamdır (örneğin, anahtar kapalı), bu yüzden akım akar."
+            },
+            {
+                id: 40,
+                question: "Bir devrede LED’in çalışması için ne gereklidir?",
+                options: [
+                    "a) Doğru bağlantı",
+                    "b) Ses dalgaları",
+                    "c) Işık enerjisi",
+                    "d) Hava"
+                ],
+                correct: "a",
+                explanation: "LED’in çalışması için artı ve eksi uçlarının doğru bağlanması gerekir."
+            },
+            {
+                id: 41,
+                question: "Aşağıdakilerden hangisi bir yalıtkan maddedir?",
+                options: [
+                    "a) Gümüş",
+                    "b) Kauçuk",
+                    "c) Bakır",
+                    "d) Çelik"
+                ],
+                correct: "b",
+                explanation: "Kauçuk, elektriği geçirmez ve yalıtkan bir maddedir."
+            },
+            {
+                id: 42,
+                question: "Bir devrede iki ampul seri bağlanırsa ne olur?",
+                options: [
+                    "a) Ampuller daha parlak yanar",
+                    "b) Ampuller daha az parlak yanar",
+                    "c) Ampuller aynı parlaklıkta yanar",
+                    "d) Devre kapanır"
+                ],
+                correct: "b",
+                explanation: "Seri bağlantıda akım tüm ampullerden geçer, bu yüzden her ampul daha az parlak yanar."
+            },
+            {
+                id: 43,
+                question: "Bir devrede enerji kaybını azaltmak için ne kullanılır?",
+                options: [
+                    "a) İnce kablo",
+                    "b) Kalın kablo",
+                    "c) Uzun kablo",
+                    "d) Kırık kablo"
+                ],
+                correct: "b",
+                explanation: "Kalın kablolar, direnci azaltır ve enerji kaybını önler."
+            },
+            {
+                id: 44,
+                question: "Bir devrede pilin eksi (-) ucu nereye bağlanır?",
+                options: [
+                    "a) Ampulün artı ucuna",
+                    "b) Devrenin sonuna",
+                    "c) Anahtarın ortasına",
+                    "d) Kablonun başlangıcına"
+                ],
+                correct: "b",
+                explanation: "Pilin eksi (-) ucu, devrenin sonuna bağlanır ve akım buradan geri döner."
+            },
+            {
+                id: 45,
+                question: "Aşağıdakilerden hangisi elektrik devresinde ışık üretir?",
+                options: [
+                    "a) Pil",
+                    "b) Kablo",
+                    "c) LED",
+                    "d) Anahtar"
+                ],
+                correct: "c",
+                explanation: "LED, elektrik akımıyla çalışarak ışık üretir."
+            },
+            {
+                id: 46,
+                question: "Bir devrede akımın ölçülmesi için hangi araç kullanılır?",
+                options: [
+                    "a) Voltmetre",
+                    "b) Ampermetre",
+                    "c) Ohmmetre",
+                    "d) Termometre"
+                ],
+                correct: "b",
+                explanation: "Ampermetre, devredeki elektrik akımını (Amper) ölçer."
+            },
+            {
+                id: 47,
+                question: "Bir devrede gerilimin ölçülmesi için hangi araç kullanılır?",
+                options: [
+                    "a) Voltmetre",
+                    "b) Ampermetre",
+                    "c) Ohmmetre",
+                    "d) Termometre"
+                ],
+                correct: "a",
+                explanation: "Voltmetre, devredeki gerilimi (Volt) ölçer."
+            },
+            {
+                id: 48,
+                question: "Bir devrede direncin ölçülmesi için hangi araç kullanılır?",
+                options: [
+                    "a) Voltmetre",
+                    "b) Ampermetre",
+                    "c) Ohmmetre",
+                    "d) Termometre"
+                ],
+                correct: "c",
+                explanation: "Ohmmetre, devredeki direnci (Ohm) ölçer."
+            },
+            {
+                id: 49,
+                question: "Aşağıdaki araçlardan hangisi elektrikle çalışır?",
+                options: [
+                    "a) El arabası",
+                    "b) Elektrikli süpürge",
+                    "c) Bisiklet",
+                    "d) Kürek"
+                ],
+                correct: "b",
+                explanation: "Elektrikli süpürge, elektrik enerjisiyle çalışır."
+            },
+            {
+                id: 50,
+                question: "Bir devrede ampulün yanması için devre nasıl olmalıdır?",
+                options: [
+                    "a) Açık",
+                    "b) Kapalı",
+                    "c) Kısa devre",
+                    "d) Kopuk"
+                ],
+                correct: "b",
+                explanation: "Ampulün yanması için devre kapalı olmalı, yani akım tüm bileşenlerden geçebilmelidir."
+            }
+        ];
+
+        // Dinamik olarak soruları oluştur
+        const quizForm = document.getElementById('quizForm');
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `q${index + 1}`;
+            questionDiv.innerHTML = `
+                <h3>${q.id}. ${q.question}</h3>
+                <div class="options">
+                    ${q.options.map(opt => `<label><input type="radio" name="q${index + 1}" value="${opt[0]}"> ${opt}</label>`).join('')}
+                </div>
+                <div class="question-summary" id="summary${index + 1}"></div>
+            `;
+            quizForm.insertBefore(questionDiv, document.getElementById('submitExam'));
+        });
+
+        // Sınavı bitirme, puan hesaplama ve her sorunun altında özet gösterimi
+        document.getElementById('submitExam').addEventListener('click', () => {
+            let score = 0;
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+                const selectedOption = selected ? questions[index].options.find(opt => opt.startsWith(selected.value)) : "Cevap seçilmedi";
+                const correctOption = questions[index].options.find(opt => opt.startsWith(q.correct));
+                const isCorrect = selected && selected.value === q.correct;
+
+                if (isCorrect) {
+                    score += 2; // Her doğru cevap 2 puan
+                }
+
+                // Her sorunun altında özet göster
+                const summaryDiv = document.getElementById(`summary${index + 1}`);
+                summaryDiv.className = `question-summary ${isCorrect ? 'correct' : 'incorrect'}`;
+                summaryDiv.innerHTML = `
+                    <p><strong>Seçtiğiniz cevap:</strong> ${selectedOption}</p>
+                    <p><strong>Doğru cevap:</strong> ${correctOption}</p>
+                    <p><strong>Durum:</strong> <span class="summary-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Doğru' : 'Yanlış'}</span></p>
+                    <p><strong>Çözüm:</strong> ${q.explanation}</p>
+                `;
+                summaryDiv.style.display = 'block';
+            });
+
+            // Puanı göster
+            document.getElementById('score').innerHTML = `Toplam Puanınız: ${score} / 100`;
+
+            // Sayfayı en üste kaydır
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

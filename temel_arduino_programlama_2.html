@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6. Sınıf Temel Arduino Programlama (Kodlarla) Deneme Sınavı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .question {
+            background: #f8fafc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .question:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .question h3 {
+            margin: 0 0 15px;
+            color: #1e3a8a;
+            font-size: 1.3em;
+        }
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Consolas', monospace;
+        }
+        .options label {
+            display: block;
+            padding: 12px;
+            margin: 5px 0;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background: #cbd5e1;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-summary {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 4px solid;
+            border-radius: 8px;
+        }
+        .question-summary.correct {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+        .question-summary.incorrect {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .question-summary p {
+            margin: 5px 0;
+        }
+        .summary-status {
+            font-weight: bold;
+        }
+        .summary-status.correct {
+            color: #10b981;
+        }
+        .summary-status.incorrect {
+            color: #ef4444;
+        }
+        #submitExam {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #submitExam:hover {
+            background: #1e40af;
+        }
+        #score {
+            text-align: center;
+            font-size: 1.4em;
+            color: #1e3a8a;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .question h3 {
+                font-size: 1.1em;
+            }
+            pre {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>6. Sınıf Temel Arduino Programlama (Kodlarla) Deneme Sınavı</h1>
+        <form id="quizForm">
+            <!-- Sorular dinamik olarak burada oluşturulacak -->
+            <button type="button" id="submitExam">Sınavı Bitir</button>
+        </form>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Sorular JSON formatında
+        const questions = [
+            {
+                id: 1,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n}</code></pre>",
+                options: [
+                    "a) 13 numaralı pindeki LED’i sürekli yakar",
+                    "b) 13 numaralı pindeki LED’i söndürür",
+                    "c) 13 numaralı pinden veri okur",
+                    "d) 13 numaralı pini giriş yapar"
+                ],
+                correct: "a",
+                explanation: "Kod, 13 numaralı pini çıkış (OUTPUT) olarak ayarlar ve loop() içinde sürekli HIGH sinyali gönderir. Bu, bağlı LED’in sürekli yanmasını sağlar."
+            },
+            {
+                id: 2,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(1000);\n  digitalWrite(13, LOW);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 1 saniye yakar, 1 saniye söndürür",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i 1 saniye söndürür, sonra yakar"
+                ],
+                correct: "a",
+                explanation: "Kod, 13 numaralı pindeki LED’i 1 saniye yakar (HIGH), sonra 1 saniye söndürür (LOW). Bu işlem loop() içinde tekrarlanır."
+            },
+            {
+                id: 3,
+                question: "Aşağıdaki kodda eksik olan komut nedir?\n\n<pre><code>void setup() {\n  // 13 numaralı pini çıkış yap\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n}</code></pre>",
+                options: [
+                    "a) digitalRead(13)",
+                    "b) pinMode(13, OUTPUT)",
+                    "c) delay(1000)",
+                    "d) Serial.begin(9600)"
+                ],
+                correct: "b",
+                explanation: "13 numaralı pini çıkış yapmak için setup() içinde pinMode(13, OUTPUT) komutu kullanılmalıdır. Aksi takdirde, digitalWrite() çalışmaz."
+            },
+            {
+                id: 4,
+                question: "Aşağıdaki kod neyi eksik yapıyor?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n}\nvoid loop() {\n  int durum = digitalRead(2);\n  if (durum == HIGH) {\n    // LED’i yak\n  }\n}</code></pre>",
+                options: [
+                    "a) LED pini çıkış olarak ayarlanmamış",
+                    "b) Buton pini OUTPUT olarak ayarlanmış",
+                    "c) delay() komutu eksik",
+                    "d) Seri monitör başlatılmamış"
+                ],
+                correct: "a",
+                explanation: "LED’i yakmak için bir pin (örneğin, 13) çıkış (OUTPUT) olarak ayarlanmalı ve digitalWrite() ile kontrol edilmelidir. Kodda bu eksik."
+            },
+            {
+                id: 5,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  Serial.print(\"Merhaba\");\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 'Merhaba'",
+                    "b) Bir kez 'Merhaba'",
+                    "c) Hiçbir şey yazmaz",
+                    "d) 'Merhaba' ve bir sayı"
+                ],
+                correct: "a",
+                explanation: "Kod, seri iletişimi başlatır ve loop() içinde her saniye 'Merhaba' yazdırır. delay(1000) her yazma arasında 1 saniye bekler."
+            },
+            {
+                id: 6,
+                question: "Aşağıdaki kod neden çalışmaz?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, high);\n}</code></pre>",
+                options: [
+                    "a) HIGH yerine high yazılmış",
+                    "b) pinMode() eksik",
+                    "c) delay() eksik",
+                    "d) Seri monitör başlatılmamış"
+                ],
+                correct: "a",
+                explanation: "Arduino’da HIGH büyük harfle yazılır. 'high' yazımı hatalıdır ve kod derlenmez."
+            },
+            {
+                id: 7,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>int ledPin = 13;\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  delay(500);\n  digitalWrite(ledPin, LOW);\n  delay(500);\n}</code></pre>",
+                options: [
+                    "a) LED’i her 0.5 saniyede yanıp söndürür",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i 1 saniye yakar"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 0.5 saniye yakar, 0.5 saniye söndürür. Bu, 1 saniyelik bir yanıp sönme döngüsü oluşturur."
+            },
+            {
+                id: 8,
+                question: "Aşağıdaki kodda buton basıldığında ne olur?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  if (digitalRead(2) == HIGH) {\n    digitalWrite(13, HIGH);\n  } else {\n    digitalWrite(13, LOW);\n  }\n}</code></pre>",
+                options: [
+                    "a) LED yanar",
+                    "b) LED söner",
+                    "c) LED yanıp söner",
+                    "d) Hiçbir şey olmaz"
+                ],
+                correct: "a",
+                explanation: "Buton basıldığında (HIGH), LED yanar. Basılmadığında (LOW), LED söner."
+            },
+            {
+                id: 9,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  // LED’in parlaklığını 50 yap\n}</code></pre>",
+                options: [
+                    "a) digitalWrite(9, 50)",
+                    "b) analogWrite(9, 50)",
+                    "c) digitalRead(9)",
+                    "d) delay(50)"
+                ],
+                correct: "b",
+                explanation: "LED parlaklığını ayarlamak için PWM pininde analogWrite() kullanılır. 9 numaralı pin PWM destekler."
+            },
+            {
+                id: 10,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = analogRead(A0);\n  Serial.println(deger);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) A0 pininden her saniye analog değer okur ve seri monitöre yazar",
+                    "b) A0 pinine veri yazar",
+                    "c) A0 pinini çıkış yapar",
+                    "d) Hiçbir şey yapmaz"
+                ],
+                correct: "a",
+                explanation: "Kod, A0 pininden analog veriyi (0-1023) okur ve her saniye seri monitöre yazar."
+            },
+            {
+                id: 11,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, INPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n}</code></pre>",
+                options: [
+                    "a) Pin INPUT olarak ayarlanmış",
+                    "b) digitalWrite() yanlış kullanılmış",
+                    "c) delay() eksik",
+                    "d) Serial.begin() eksik"
+                ],
+                correct: "a",
+                explanation: "digitalWrite() için pin OUTPUT olmalı. INPUT ayarı, pinin çıkış yerine giriş olmasına neden olur."
+            },
+            {
+                id: 12,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  for (int i = 0; i < 5; i++) {\n    digitalWrite(13, HIGH);\n    delay(500);\n    digitalWrite(13, LOW);\n    delay(500);\n  }\n}</code></pre>",
+                options: [
+                    "a) LED’i 5 kez yanıp söndürür, sonra tekrarlar",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i 5 saniye yakar",
+                    "d) LED’i söndürür"
+                ],
+                correct: "a",
+                explanation: "for döngüsü, LED’i 5 kez 0.5 saniye yakıp söndürür. loop() içinde olduğu için bu işlem tekrarlanır."
+            },
+            {
+                id: 13,
+                question: "Aşağıdaki kodda seri monitöre ne yazılır?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int sayi = 10;\n  sayi++;\n  Serial.println(sayi);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 11",
+                    "b) Her saniye artan sayılar (10, 11, 12...)",
+                    "c) Bir kez 11",
+                    "d) Hiçbir şey"
+                ],
+                correct: "a",
+                explanation: "sayi her loop() başında 10 olarak tanımlanır, ++ ile 11 olur ve seri monitöre yazılır. Bu, her saniye tekrarlanır."
+            },
+            {
+                id: 14,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>int ledPin = 9;\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n}\nvoid loop() {\n  analogWrite(ledPin, 128);\n}</code></pre>",
+                options: [
+                    "a) LED’in parlaklığını orta seviyeye ayarlar",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i yanıp söndürür"
+                ],
+                correct: "a",
+                explanation: "analogWrite(9, 128), LED’in parlaklığını 0-255 skalasında orta seviyeye (yaklaşık %50) ayarlar."
+            },
+            {
+                id: 15,
+                question: "Aşağıdaki kod neden çalışmaz?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  Serial.Print(\"Merhaba\");\n}</code></pre>",
+                options: [
+                    "a) Serial.Print() yerine Serial.print() yazılmalı",
+                    "b) delay() eksik",
+                    "c) pinMode() eksik",
+                    "d) loop() yanlış yazılmış"
+                ],
+                correct: "a",
+                explanation: "Arduino’da seri monitöre yazmak için Serial.print() kullanılır. Büyük harfli 'Print' hatalıdır."
+            },
+            {
+                id: 16,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, digitalRead(2));\n}</code></pre>",
+                options: [
+                    "a) Buton basılıysa LED yanar, değilse söner",
+                    "b) LED sürekli yanar",
+                    "c) LED sürekli söner",
+                    "d) LED yanıp söner"
+                ],
+                correct: "a",
+                explanation: "digitalRead(2) butonun durumunu (HIGH/LOW) okur ve bu değeri doğrudan LED’e yazar. Buton basılıysa LED yanar."
+            },
+            {
+                id: 17,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(A0, INPUT);\n}\nvoid loop() {\n  int deger = analogRead(A0);\n  // Degeri seri monitöre yaz\n}</code></pre>",
+                options: [
+                    "a) Serial.begin(9600)",
+                    "b) digitalWrite(A0, deger)",
+                    "c) pinMode(A0, OUTPUT)",
+                    "d) delay(1000)"
+                ],
+                correct: "a",
+                explanation: "Seri monitöre yazmak için setup() içinde Serial.begin(9600) ile seri iletişim başlatılmalı."
+            },
+            {
+                id: 18,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(2000);\n  digitalWrite(13, LOW);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 2 saniye yakar, 1 saniye söndürür",
+                    "b) LED’i 1 saniye yakar, 2 saniye söndürür",
+                    "c) LED’i sürekli yakar",
+                    "d) LED’i sürekli söner"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 2 saniye yakar (HIGH), 1 saniye söndürür (LOW). Bu döngü tekrarlanır."
+            },
+            {
+                id: 19,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  if (digitalRead(13) == HIGH) {\n    digitalWrite(13, LOW);\n  }\n}</code></pre>",
+                options: [
+                    "a) Pin 13 INPUT olmalı",
+                    "b) digitalRead() yanlış pin kullanıyor",
+                    "c) delay() eksik",
+                    "d) if koşulu yanlış"
+                ],
+                correct: "a",
+                explanation: "digitalRead() için pin INPUT olmalı. 13 numaralı pin OUTPUT olduğu için digitalRead() mantıksız."
+            },
+            {
+                id: 20,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  for (int i = 0; i < 3; i++) {\n    Serial.println(i);\n  }\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 0, 1, 2",
+                    "b) Bir kez 0, 1, 2",
+                    "c) Sürekli artan sayılar",
+                    "d) Hiçbir şey"
+                ],
+                correct: "a",
+                explanation: "for döngüsü her loop()’ta 0, 1, 2 yazdırır. delay(1000) ile bu her saniye tekrarlanır."
+            },
+            {
+                id: 21,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>int ledPin = 9;\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n}\nvoid loop() {\n  for (int parlaklik = 0; parlaklik <= 255; parlaklik += 5) {\n    analogWrite(ledPin, parlaklik);\n    delay(50);\n  }\n}</code></pre>",
+                options: [
+                    "a) LED’in parlaklığını yavaşça artırır",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i yanıp söndürür"
+                ],
+                correct: "a",
+                explanation: "for döngüsü, LED’in parlaklığını 0’dan 255’e her 50 ms’de 5 artırır, bu da parlaklığın yavaşça artmasını sağlar."
+            },
+            {
+                id: 22,
+                question: "Aşağıdaki kod neden çalışmaz?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalwrite(13, HIGH);\n}</code></pre>",
+                options: [
+                    "a) digitalwrite yerine digitalWrite yazılmalı",
+                    "b) pinMode() yanlış",
+                    "c) delay() eksik",
+                    "d) HIGH yanlış yazılmış"
+                ],
+                correct: "a",
+                explanation: "Arduino komutları büyük-küçük harfe duyarlıdır. digitalwrite yerine digitalWrite yazılmalı."
+            },
+            {
+                id: 23,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  if (digitalRead(2) == LOW) {\n    digitalWrite(13, HIGH);\n  } else {\n    digitalWrite(13, LOW);\n  }\n}</code></pre>",
+                options: [
+                    "a) Buton basılı değilse LED yanar",
+                    "b) Buton basılıysa LED yanar",
+                    "c) LED sürekli yanar",
+                    "d) LED sürekli söner"
+                ],
+                correct: "a",
+                explanation: "Buton basılı değilse (LOW), LED yanar. Basılıysa (HIGH), LED söner."
+            },
+            {
+                id: 24,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  // LED’i 1 saniye yak, 1 saniye söndür\n}</code></pre>",
+                options: [
+                    "a) digitalWrite(13, HIGH); delay(1000); digitalWrite(13, LOW); delay(1000);",
+                    "b) Serial.begin(9600);",
+                    "c) pinMode(13, INPUT);",
+                    "d) analogWrite(13, 255);"
+                ],
+                correct: "a",
+                explanation: "LED’i 1 saniye yakıp söndürmek için digitalWrite() ve delay() komutları gerekir."
+            },
+            {
+                id: 25,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = 5;\n  if (deger > 3) {\n    Serial.println(\"Büyük\");\n  }\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 'Büyük'",
+                    "b) Bir kez 'Büyük'",
+                    "c) Hiçbir şey",
+                    "d) 'Küçük'"
+                ],
+                correct: "a",
+                explanation: "deger > 3 olduğu için her loop()’ta 'Büyük' yazılır. delay(1000) ile bu her saniye tekrarlanır."
+            },
+            {
+                id: 26,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(3000);\n  digitalWrite(13, LOW);\n  delay(2000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 3 saniye yakar, 2 saniye söndürür",
+                    "b) LED’i 2 saniye yakar, 3 saniye söndürür",
+                    "c) LED’i sürekli yakar",
+                    "d) LED’i sürekli söner"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 3 saniye yakar, 2 saniye söndürür. Bu döngü tekrarlanır."
+            },
+            {
+                id: 27,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  Delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Delay yerine delay yazılmalı",
+                    "b) pinMode() yanlış",
+                    "c) digitalWrite() yanlış",
+                    "d) HIGH yanlış"
+                ],
+                correct: "a",
+                explanation: "Arduino’da gecikme için delay() kullanılır. Büyük harfli Delay hatalıdır."
+            },
+            {
+                id: 28,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = analogRead(A0);\n  if (deger > 500) {\n    Serial.println(\"Yüksek\");\n  } else {\n    Serial.println(\"Düşük\");\n  }\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) A0’dan okunan değer 500’den büyükse 'Yüksek', değilse 'Düşük' yazar",
+                    "b) Her zaman 'Yüksek' yazar",
+                    "c) Her zaman 'Düşük' yazar",
+                    "d) Hiçbir şey yazmaz"
+                ],
+                correct: "a",
+                explanation: "Kod, A0’dan okunan analog değeri kontrol eder ve 500’den büyükse 'Yüksek', değilse 'Düşük' yazar."
+            },
+            {
+                id: 29,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  // LED’in parlaklığını her saniye artır\n}</code></pre>",
+                options: [
+                    "a) for döngüsü ve analogWrite()",
+                    "b) digitalWrite(9, HIGH)",
+                    "c) Serial.begin(9600)",
+                    "d) pinMode(9, INPUT)"
+                ],
+                correct: "a",
+                explanation: "Parlaklığı artırmak için for döngüsü ile analogWrite() kullanılmalı. Örneğin, for (int i = 0; i <= 255; i++) { analogWrite(9, i); }"
+            },
+            {
+                id: 30,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(100);\n  digitalWrite(13, LOW);\n  delay(100);\n}</code></pre>",
+                options: [
+                    "a) LED’i her 0.1 saniyede yanıp söndürür",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i 1 saniye yakar"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 0.1 saniye yakar, 0.1 saniye söndürür. Bu, hızlı bir yanıp sönme oluşturur."
+            },
+            {
+                id: 31,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = AnalogRead(A0);\n  Serial.println(deger);\n}</code></pre>",
+                options: [
+                    "a) AnalogRead yerine analogRead yazılmalı",
+                    "b) Serial.begin() yanlış",
+                    "c) delay() eksik",
+                    "d) pinMode() eksik"
+                ],
+                correct: "a",
+                explanation: "Analog okuma için analogRead() kullanılır. Büyük harfli AnalogRead hatalıdır."
+            },
+            {
+                id: 32,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  if (digitalRead(2) == HIGH) {\n    analogWrite(9, 255);\n  } else {\n    analogWrite(9, 0);\n  }\n}</code></pre>",
+                options: [
+                    "a) Buton basılıysa LED tam parlak, değilse söner",
+                    "b) LED sürekli parlak yanar",
+                    "c) LED sürekli söner",
+                    "d) LED yanıp söner"
+                ],
+                correct: "a",
+                explanation: "Buton basılıysa (HIGH), LED tam parlaklıkta (255) yanar; değilse söner (0)."
+            },
+            {
+                id: 33,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int sayi = 0;\n  sayi += 2;\n  Serial.println(sayi);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 2",
+                    "b) Artan sayılar (2, 4, 6...)",
+                    "c) Bir kez 2",
+                    "d) Hiçbir şey"
+                ],
+                correct: "a",
+                explanation: "sayi her loop()’ta 0 olarak tanımlanır, += 2 ile 2 olur ve seri monitöre yazılır. Bu, her saniye tekrarlanır."
+            },
+            {
+                id: 34,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(5000);\n  digitalWrite(13, LOW);\n  delay(5000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 5 saniye yakar, 5 saniye söndürür",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i 1 saniye yakar"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 5 saniye yakar, 5 saniye söndürür. Bu döngü tekrarlanır."
+            },
+            {
+                id: 35,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  // Seri iletişimi başlat\n}\nvoid loop() {\n  Serial.println(\"Test\");\n}</code></pre>",
+                options: [
+                    "a) Serial.begin(9600)",
+                    "b) digitalWrite(13, HIGH)",
+                    "c) pinMode(13, OUTPUT)",
+                    "d) delay(1000)"
+                ],
+                correct: "a",
+                explanation: "Seri monitöre yazmak için setup() içinde Serial.begin(9600) ile seri iletişim başlatılmalı."
+            },
+            {
+                id: 36,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  analogWrite(9, 255);\n  delay(1000);\n  analogWrite(9, 0);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 1 saniye tam parlak, 1 saniye söndürür",
+                    "b) LED’i sürekli parlak yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’in parlaklığını yavaşça artırır"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’i 1 saniye tam parlaklıkta (255) yakar, 1 saniye söndürür (0)."
+            },
+            {
+                id: 37,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(1000);\n  digitalWrite(13, LOW);\n  Delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Delay yerine delay yazılmalı",
+                    "b) pinMode() yanlış",
+                    "c) digitalWrite() yanlış",
+                    "d) HIGH yanlış"
+                ],
+                correct: "a",
+                explanation: "Arduino’da gecikme için delay() kullanılır. Büyük harfli Delay hatalıdır."
+            },
+            {
+                id: 38,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  int durum = digitalRead(2);\n  digitalWrite(13, !durum);\n}</code></pre>",
+                options: [
+                    "a) Buton basılıysa LED söner, değilse yanar",
+                    "b) Buton basılıysa LED yanar",
+                    "c) LED sürekli yanar",
+                    "d) LED sürekli söner"
+                ],
+                correct: "a",
+                explanation: "!durum, butonun durumunu tersine çevirir. Buton HIGH ise LED LOW (söner), LOW ise LED HIGH (yanar)."
+            },
+            {
+                id: 39,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = analogRead(A0);\n  if (deger < 200) {\n    Serial.println(\"Düşük\");\n  }\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Değer 200’den küçükse her saniye 'Düşük'",
+                    "b) Her zaman 'Düşük'",
+                    "c) Hiçbir şey",
+                    "d) Değer 200’den büyükse 'Düşük'"
+                ],
+                correct: "a",
+                explanation: "Değer 200’den küçükse 'Düşük' yazılır. Bu kontrol her saniye tekrarlanır."
+            },
+            {
+                id: 40,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  for (int i = 0; i < 10; i++) {\n    digitalWrite(13, HIGH);\n    delay(100);\n    digitalWrite(13, LOW);\n    delay(100);\n  }\n  delay(5000);\n}</code></pre>",
+                options: [
+                    "a) LED’i 10 kez hızlı yanıp söndürür, 5 saniye bekler",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i 10 saniye yakar"
+                ],
+                correct: "a",
+                explanation: "for döngüsü LED’i 10 kez 0.1 saniye yakıp söndürür, sonra 5 saniye bekler. Bu döngü tekrarlanır."
+            },
+            {
+                id: 41,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n}\nvoid loop() {\n  if (digitalRead(2) == HIGH) {\n    // LED’i yak\n  }\n}</code></pre>",
+                options: [
+                    "a) pinMode(13, OUTPUT) ve digitalWrite(13, HIGH)",
+                    "b) Serial.begin(9600)",
+                    "c) delay(1000)",
+                    "d) analogWrite(2, 255)"
+                ],
+                correct: "a",
+                explanation: "LED’i yakmak için bir pin (örneğin, 13) OUTPUT olarak ayarlanmalı ve digitalWrite() ile HIGH yapılmalı."
+            },
+            {
+                id: 42,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  for (int i = 255; i >= 0; i -= 5) {\n    analogWrite(9, i);\n    delay(50);\n  }\n}</code></pre>",
+                options: [
+                    "a) LED’in parlaklığını yavaşça azaltır",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i yanıp söndürür"
+                ],
+                correct: "a",
+                explanation: "for döngüsü, LED’in parlaklığını 255’ten 0’a her 50 ms’de 5 azaltır, bu da parlaklığın yavaşça azalmasını sağlar."
+            },
+            {
+                id: 43,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(1000);\n  digitalWrite(13, LOW);\n  delay(1000);\n  digitalWrite(13, HIGH);\n}</code></pre>",
+                options: [
+                    "a) Son digitalWrite()’tan sonra delay() eksik",
+                    "b) pinMode() yanlış",
+                    "c) HIGH yanlış yazılmış",
+                    "d) loop() yanlış"
+                ],
+                correct: "a",
+                explanation: "Son digitalWrite(13, HIGH) sonrası delay() olmadan kod hemen başa döner, bu da LED’in neredeyse sürekli yanık görünmesine neden olur."
+            },
+            {
+                id: 44,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = 10;\n  deger--;\n  Serial.println(deger);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 9",
+                    "b) Azalan sayılar (10, 9, 8...)",
+                    "c) Bir kez 9",
+                    "d) Hiçbir şey"
+                ],
+                correct: "a",
+                explanation: "deger her loop()’ta 10 olarak tanımlanır, -- ile 9 olur ve seri monitöre yazılır. Bu, her saniye tekrarlanır."
+            },
+            {
+                id: 45,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(2, INPUT);\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  if (digitalRead(2) == HIGH) {\n    digitalWrite(13, HIGH);\n    delay(500);\n    digitalWrite(13, LOW);\n    delay(500);\n  }\n}</code></pre>",
+                options: [
+                    "a) Buton basılıysa LED 0.5 saniye yanıp söner",
+                    "b) Buton basılıysa LED sürekli yanar",
+                    "c) Buton basılı değilse LED yanar",
+                    "d) LED sürekli söner"
+                ],
+                correct: "a",
+                explanation: "Buton basılıysa (HIGH), LED 0.5 saniye yakılır, 0.5 saniye söndürülür. Bu, buton basılı olduğu sürece devam eder."
+            },
+            {
+                id: 46,
+                question: "Aşağıdaki kodda eksik olan nedir?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  // LED’i 2 kez yanıp söndür, sonra 3 saniye bekle\n}</code></pre>",
+                options: [
+                    "a) for döngüsü, digitalWrite() ve delay()",
+                    "b) Serial.begin(9600)",
+                    "c) pinMode(13, INPUT)",
+                    "d) analogWrite(13, 255)"
+                ],
+                correct: "a",
+                explanation: "LED’i 2 kez yanıp söndürmek için for döngüsü, digitalWrite() ve delay() kullanılmalı. Sonra delay(3000) eklenmeli."
+            },
+            {
+                id: 47,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int deger = analogRead(A0);\n  Serial.println(deger / 4);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) A0’dan okunan değeri 4’e böler ve seri monitöre yazar",
+                    "b) A0’dan okunan değeri 4 ile çarpar",
+                    "c) Hiçbir şey yazmaz",
+                    "d) A0 pinine veri yazar"
+                ],
+                correct: "a",
+                explanation: "Kod, A0’dan okunan analog değeri (0-1023) 4’e böler ve sonucu seri monitöre yazar."
+            },
+            {
+                id: 48,
+                question: "Aşağıdaki kodda hata nerede?\n\n<pre><code>void setup() {\n  pinMode(13, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(13, HIGH);\n  delay(1000);\n  digitalWrite(13, LOW);\n}</code></pre>",
+                options: [
+                    "a) Son digitalWrite()’tan sonra delay() eksik",
+                    "b) pinMode() yanlış",
+                    "c) HIGH yanlış",
+                    "d) loop() yanlış"
+                ],
+                correct: "a",
+                explanation: "Son digitalWrite(13, LOW) sonrası delay() olmadan kod hemen başa döner, bu da LED’in çok kısa süre söndürülmesine neden olur."
+            },
+            {
+                id: 49,
+                question: "Aşağıdaki kod ne yapar?\n\n<pre><code>void setup() {\n  pinMode(9, OUTPUT);\n}\nvoid loop() {\n  analogWrite(9, 64);\n  delay(1000);\n  analogWrite(9, 128);\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) LED’in parlaklığını her saniye değiştirir",
+                    "b) LED’i sürekli yakar",
+                    "c) LED’i sürekli söndürür",
+                    "d) LED’i yanıp söndürür"
+                ],
+                correct: "a",
+                explanation: "Kod, LED’in parlaklığını 1 saniye %25 (64), 1 saniye %50 (128) olarak değiştirir."
+            },
+            {
+                id: 50,
+                question: "Aşağıdaki kod seri monitöre ne yazar?\n\n<pre><code>void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  int sayi = 5;\n  if (sayi == 5) {\n    Serial.println(\"Eşit\");\n  }\n  delay(1000);\n}</code></pre>",
+                options: [
+                    "a) Her saniye 'Eşit'",
+                    "b) Bir kez 'Eşit'",
+                    "c) Hiçbir şey",
+                    "d) 'Farklı'"
+                ],
+                correct: "a",
+                explanation: "sayi 5 olduğu için her loop()’ta 'Eşit' yazılır. delay(1000) ile bu her saniye tekrarlanır."
+            }
+        ];
+
+        // Dinamik olarak soruları oluştur
+        const quizForm = document.getElementById('quizForm');
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `q${index + 1}`;
+            questionDiv.innerHTML = `
+                <h3>${q.id}. ${q.question}</h3>
+                <div class="options">
+                    ${q.options.map(opt => `<label><input type="radio" name="q${index + 1}" value="${opt[0]}"> ${opt}</label>`).join('')}
+                </div>
+                <div class="question-summary" id="summary${index + 1}"></div>
+            `;
+            quizForm.insertBefore(questionDiv, document.getElementById('submitExam'));
+        });
+
+        // Sınavı bitirme, puan hesaplama ve her sorunun altında özet gösterimi
+        document.getElementById('submitExam').addEventListener('click', () => {
+            let score = 0;
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+                const selectedOption = selected ? questions[index].options.find(opt => opt.startsWith(selected.value)) : "Cevap seçilmedi";
+                const correctOption = questions[index].options.find(opt => opt.startsWith(q.correct));
+                const isCorrect = selected && selected.value === q.correct;
+
+                if (isCorrect) {
+                    score += 2; // Her doğru cevap 2 puan
+                }
+
+                // Her sorunun altında özet göster
+                const summaryDiv = document.getElementById(`summary${index + 1}`);
+                summaryDiv.className = `question-summary ${isCorrect ? 'correct' : 'incorrect'}`;
+                summaryDiv.innerHTML = `
+                    <p><strong>Seçtiğiniz cevap:</strong> ${selectedOption}</p>
+                    <p><strong>Doğru cevap:</strong> ${correctOption}</p>
+                    <p><strong>Durum:</strong> <span class="summary-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Doğru' : 'Yanlış'}</span></p>
+                    <p><strong>Çözüm:</strong> ${q.explanation}</p>
+                `;
+                summaryDiv.style.display = 'block';
+            });
+
+            // Puanı göster
+            document.getElementById('score').innerHTML = `Toplam Puanınız: ${score} / 100`;
+
+            // Sayfayı en üste kaydır
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

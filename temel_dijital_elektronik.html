@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temel Dijital Elektronik Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #1e3a8a;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .question {
+            background: #f8fafc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .question:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .question h3 {
+            margin: 0 0 15px;
+            color: #1e3a8a;
+            font-size: 1.3em;
+        }
+        .options label {
+            display: block;
+            padding: 12px;
+            margin: 5px 0;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background: #cbd5e1;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .question-summary {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 4px solid;
+            border-radius: 8px;
+        }
+        .question-summary.correct {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+        .question-summary.incorrect {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .question-summary p {
+            margin: 5px 0;
+        }
+        .summary-status {
+            font-weight: bold;
+        }
+        .summary-status.correct {
+            color: #10b981;
+        }
+        .summary-status.incorrect {
+            color: #ef4444;
+        }
+        #submitExam {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #submitExam:hover {
+            background: #1e40af;
+        }
+        #score {
+            text-align: center;
+            font-size: 1.4em;
+            color: #1e3a8a;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .question h3 {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>6. Sınıf Temel Dijital Elektronik Deneme Sınavı</h1>
+        <form id="quizForm">
+            <!-- Sorular dinamik olarak burada oluşturulacak -->
+            <button type="button" id="submitExam">Sınavı Bitir</button>
+        </form>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Sorular JSON formatında
+        const questions = [
+            {
+                id: 1,
+                question: "Dijital elektronik nedir?",
+                options: [
+                    "a) Ses dalgalarıyla çalışan sistemler",
+                    "b) 0 ve 1 gibi sayılarla çalışan sistemler",
+                    "c) Işık enerjisiyle çalışan sistemler",
+                    "d) Mekanik sistemler"
+                ],
+                correct: "b",
+                explanation: "Dijital elektronik, 0 (kapalı) ve 1 (açık) gibi sayılarla çalışan sistemlerdir. Bilgisayarlar ve mikrodenetleyiciler bu şekilde çalışır."
+            },
+            {
+                id: 2,
+                question: "Dijital sinyal nedir?",
+                options: [
+                    "a) Sürekli değişen bir sinyal",
+                    "b) Sadece 0 ve 1 değerlerini alan sinyal",
+                    "c) Işık sinyali",
+                    "d) Ses sinyali"
+                ],
+                correct: "b",
+                explanation: "Dijital sinyal, sadece iki durum alır: 0 (düşük voltaj) ve 1 (yüksek voltaj). Örneğin, bir buton basıldığında 1, basılmadığında 0 sinyali üretir."
+            },
+            {
+                id: 3,
+                question: "Analog sinyal ile dijital sinyal arasındaki fark nedir?",
+                options: [
+                    "a) Analog sinyal sadece 0 ve 1 alır",
+                    "b) Dijital sinyal sürekli değişir",
+                    "c) Analog sinyal sürekli değişir, dijital sinyal sadece 0 ve 1 alır",
+                    "d) Her ikisi de aynıdır"
+                ],
+                correct: "c",
+                explanation: "Analog sinyal, sürekli değişen değerler alır (örneğin, sıcaklık). Dijital sinyal ise sadece 0 ve 1 gibi kesikli değerler alır."
+            },
+            {
+                id: 4,
+                question: "Bir mikrodenetleyici ne yapar?",
+                options: [
+                    "a) Sadece ışık üretir",
+                    "b) Elektronik cihazları kontrol eder",
+                    "c) Ses kaydeder",
+                    "d) Enerji üretir"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, elektronik cihazları (örneğin, LED, sensör) kontrol eden küçük bir bilgisayardır. Arduino bir mikrodenetleyici örneğidir."
+            },
+            {
+                id: 5,
+                question: "Dijital elektronik devrelerde genellikle hangi iki durum kullanılır?",
+                options: [
+                    "a) Açık ve kapalı",
+                    "b) Hızlı ve yavaş",
+                    "c) Büyük ve küçük",
+                    "d) Sıcak ve soğuk"
+                ],
+                correct: "a",
+                explanation: "Dijital devrelerde açık (1) ve kapalı (0) durumları kullanılır. Bu, lojik seviyeler olarak adlandırılır."
+            },
+            {
+                id: 6,
+                question: "Bir LED’in dijital devrede çalışması için ne gereklidir?",
+                options: [
+                    "a) Ses sinyali",
+                    "b) Dijital sinyal",
+                    "c) Analog sinyal",
+                    "d) Işık sinyali"
+                ],
+                correct: "b",
+                explanation: "LED, dijital devrede 0 (kapalı) veya 1 (açık) sinyaliyle çalışır. Örneğin, 1 sinyali LED’i yakar."
+            },
+            {
+                id: 7,
+                question: "Bir buton dijital devrede ne üretir?",
+                options: [
+                    "a) Işık",
+                    "b) 0 veya 1 sinyali",
+                    "c) Ses",
+                    "d) Isı"
+                ],
+                correct: "b",
+                explanation: "Buton basıldığında 1, basılmadığında 0 sinyali üretir. Bu, dijital devrelerde giriş sinyali olarak kullanılır."
+            },
+            {
+                id: 8,
+                question: "Lojik kapılar nedir?",
+                options: [
+                    "a) Elektrik üreten cihazlar",
+                    "b) Dijital sinyalleri işleyen devreler",
+                    "c) Işık yayan bileşenler",
+                    "d) Sensörler"
+                ],
+                correct: "b",
+                explanation: "Lojik kapılar, dijital sinyalleri (0 ve 1) işleyerek karar veren devrelerdir. Örneğin, VEYA, VE kapıları."
+            },
+            {
+                id: 9,
+                question: "VE (AND) lojik kapısı ne yapar?",
+                options: [
+                    "a) Tüm girişler 1 ise çıkış 1 olur",
+                    "b) Herhangi bir giriş 1 ise çıkış 1 olur",
+                    "c) Tüm girişler 0 ise çıkış 1 olur",
+                    "d) Girişlerden biri 1 ise çıkış 0 olur"
+                ],
+                correct: "a",
+                explanation: "VE kapısında, tüm girişler 1 olduğunda çıkış 1 olur. Aksi takdirde çıkış 0’dır."
+            },
+            {
+                id: 10,
+                question: "VEYA (OR) lojik kapısı ne yapar?",
+                options: [
+                    "a) Tüm girişler 1 ise çıkış 1 olur",
+                    "b) Herhangi bir giriş 1 ise çıkış 1 olur",
+                    "c) Tüm girişler 0 ise çıkış 1 olur",
+                    "d) Girişlerden biri 0 ise çıkış 0 olur"
+                ],
+                correct: "b",
+                explanation: "VEYA kapısında, en az bir giriş 1 olduğunda çıkış 1 olur. Tüm girişler 0 ise çıkış 0’dır."
+            },
+            {
+                id: 11,
+                question: "DEĞİL (NOT) lojik kapısı ne yapar?",
+                options: [
+                    "a) Giriş 1 ise çıkış 0 olur",
+                    "b) Giriş 1 ise çıkış 1 olur",
+                    "c) Giriş 0 ise çıkış 0 olur",
+                    "d) Girişi değiştirmez"
+                ],
+                correct: "a",
+                explanation: "DEĞİL kapısı, giriş sinyalini tersine çevirir. Giriş 1 ise çıkış 0, giriş 0 ise çıkış 1 olur."
+            },
+            {
+                id: 12,
+                question: "Bir dijital devrede HIGH sinyali ne anlama gelir?",
+                options: [
+                    "a) 0 (kapalı)",
+                    "b) 1 (açık)",
+                    "c) Sürekli değişen sinyal",
+                    "d) Ses sinyali"
+                ],
+                correct: "b",
+                explanation: "HIGH sinyali, dijital devrede 1 (açık) durumunu temsil eder ve genellikle 5V veya 3.3V’dir."
+            },
+            {
+                id: 13,
+                question: "Bir dijital devrede LOW sinyali ne anlama gelir?",
+                options: [
+                    "a) 0 (kapalı)",
+                    "b) 1 (açık)",
+                    "c) Sürekli değişen sinyal",
+                    "d) Işık sinyali"
+                ],
+                correct: "a",
+                explanation: "LOW sinyali, dijital devrede 0 (kapalı) durumunu temsil eder ve genellikle 0V’dir."
+            },
+            {
+                id: 14,
+                question: "Bir sensör dijital devrede ne yapar?",
+                options: [
+                    "a) Işık üretir",
+                    "b) Dijital sinyal üretir",
+                    "c) Elektrik üretir",
+                    "d) Ses üretir"
+                ],
+                correct: "b",
+                explanation: "Sensörler, çevreden aldıkları veriyi (örneğin, ışık, sıcaklık) dijital sinyale (0 veya 1) çevirir."
+            },
+            {
+                id: 15,
+                question: "Dijital devrelerde genellikle hangi bileşen giriş sinyali sağlar?",
+                options: [
+                    "a) LED",
+                    "b) Buton",
+                    "c) Pil",
+                    "d) Direnç"
+                ],
+                correct: "b",
+                explanation: "Buton, dijital devrelerde giriş sinyali (0 veya 1) sağlamak için kullanılır."
+            },
+            {
+                id: 16,
+                question: "Bir LED dijital devrede nasıl kontrol edilir?",
+                options: [
+                    "a) HIGH veya LOW sinyaliyle",
+                    "b) Sesle",
+                    "c) Işıkla",
+                    "d) Isıyla"
+                ],
+                correct: "a",
+                explanation: "LED, HIGH (1) sinyaliyle yakılır, LOW (0) sinyaliyle söndürülür."
+            },
+            {
+                id: 17,
+                question: "Dijital devrelerde hangi cihaz programlanabilir?",
+                options: [
+                    "a) Direnç",
+                    "b) Mikrodenetleyici",
+                    "c) LED",
+                    "d) Kablo"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, programlanarak dijital devreleri kontrol eder. Örneğin, Arduino programlanabilir bir mikrodenetleyicidir."
+            },
+            {
+                id: 18,
+                question: "Bir dijital devrede bir buton basıldığında ne olur?",
+                options: [
+                    "a) Devre kapanır",
+                    "b) HIGH sinyali üretilir",
+                    "c) Işık üretilir",
+                    "d) Ses üretilir"
+                ],
+                correct: "b",
+                explanation: "Buton basıldığında genellikle HIGH (1) sinyali üretilir, bu sinyal devre tarafından algılanır."
+            },
+            {
+                id: 19,
+                question: "Dijital devrelerde bir LED’in parlaklığı nasıl ayarlanır?",
+                options: [
+                    "a) PWM sinyaliyle",
+                    "b) Ses sinyaliyle",
+                    "c) Işık sinyaliyle",
+                    "d) Analog sinyalle"
+                ],
+                correct: "a",
+                explanation: "PWM (Pulse Width Modulation), LED’in parlaklığını ayarlamak için kullanılan bir dijital tekniktir."
+            },
+            {
+                id: 20,
+                question: "PWM nedir?",
+                options: [
+                    "a) Bir tür sensör",
+                    "b) Darbe Genişlik Modülasyonu",
+                    "c) Bir lojik kapı",
+                    "d) Bir kablo tipi"
+                ],
+                correct: "b",
+                explanation: "PWM, dijital sinyali hızlı açıp kapatarak (darbe genişliğini değiştirerek) çıkış gücünü kontrol eder. Örneğin, LED parlaklığı için kullanılır."
+            },
+            {
+                id: 21,
+                question: "Bir dijital devrede hangi bileşen çıkış sinyali üretir?",
+                options: [
+                    "a) Buton",
+                    "b) LED",
+                    "c) Sensör",
+                    "d) Direnç"
+                ],
+                correct: "b",
+                explanation: "LED, dijital devrede çıkış sinyali (örneğin, ışık) üretir ve genellikle mikrodenetleyici tarafından kontrol edilir."
+            },
+            {
+                id: 22,
+                question: "Dijital devrelerde bir sensörün ürettiği sinyal nasıl okunur?",
+                options: [
+                    "a) Işıkla",
+                    "b) Mikrodenetleyiciyle",
+                    "c) Dirençle",
+                    "d) Kabloyla"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, sensörün ürettiği dijital sinyali okuyarak ne yapacağına karar verir."
+            },
+            {
+                id: 23,
+                question: "Bir dijital devrede lojik 1 ne anlama gelir?",
+                options: [
+                    "a) Düşük voltaj",
+                    "b) Yüksek voltaj",
+                    "c) Sürekli sinyal",
+                    "d) Ses sinyali"
+                ],
+                correct: "b",
+                explanation: "Lojik 1, yüksek voltajı (örneğin, 5V) temsil eder ve açık durumu ifade eder."
+            },
+            {
+                id: 24,
+                question: "Bir dijital devrede lojik 0 ne anlama gelir?",
+                options: [
+                    "a) Düşük voltaj",
+                    "b) Yüksek voltaj",
+                    "c) Sürekli sinyal",
+                    "d) Işık sinyali"
+                ],
+                correct: "a",
+                explanation: "Lojik 0, düşük voltajı (örneğin, 0V) temsil eder ve kapalı durumu ifade eder."
+            },
+            {
+                id: 25,
+                question: "Dijital devrelerde hangi bileşen bir devrenin açılıp kapanmasını sağlar?",
+                options: [
+                    "a) LED",
+                    "b) Buton",
+                    "c) Direnç",
+                    "d) Pil"
+                ],
+                correct: "b",
+                explanation: "Buton, dijital devrelerde bir anahtar gibi çalışır ve devrenin açılıp kapanmasını sağlar."
+            },
+            {
+                id: 26,
+                question: "Bir dijital devrede bir LED’in yanıp sönmesi nasıl sağlanır?",
+                options: [
+                    "a) HIGH ve LOW sinyallerini sırayla göndermek",
+                    "b) Sürekli HIGH sinyali göndermek",
+                    "c) Ses sinyali göndermek",
+                    "d) Işık sinyali göndermek"
+                ],
+                correct: "a",
+                explanation: "LED’in yanıp sönmesi için mikrodenetleyici HIGH (yak) ve LOW (söndür) sinyallerini sırayla gönderir."
+            },
+            {
+                id: 27,
+                question: "Dijital devrelerde hangi cihaz genellikle kontrol merkezidir?",
+                options: [
+                    "a) LED",
+                    "b) Mikrodenetleyici",
+                    "c) Kablo",
+                    "d) Direnç"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, dijital devrelerin beynidir ve diğer bileşenleri kontrol eder."
+            },
+            {
+                id: 28,
+                question: "Bir dijital devrede sensörün görevi nedir?",
+                options: [
+                    "a) Işık üretmek",
+                    "b) Çevreden veri toplamak",
+                    "c) Elektrik üretmek",
+                    "d) Ses üretmek"
+                ],
+                correct: "b",
+                explanation: "Sensörler, çevreden veri toplar (örneğin, sıcaklık, ışık) ve bunu dijital sinyale çevirir."
+            },
+            {
+                id: 29,
+                question: "Dijital devrelerde bir LED’in bağlı olduğu pin hangi modda olmalıdır?",
+                options: [
+                    "a) Giriş (INPUT)",
+                    "b) Çıkış (OUTPUT)",
+                    "c) Analog",
+                    "d) Kapalı"
+                ],
+                correct: "b",
+                explanation: "LED, mikrodenetleyici tarafından kontrol edildiği için bağlı olduğu pin çıkış (OUTPUT) modunda olmalıdır."
+            },
+            {
+                id: 30,
+                question: "Dijital devrelerde bir butonun bağlı olduğu pin hangi modda olmalıdır?",
+                options: [
+                    "a) Giriş (INPUT)",
+                    "b) Çıkış (OUTPUT)",
+                    "c) Analog",
+                    "d) Kapalı"
+                ],
+                correct: "a",
+                explanation: "Buton, sinyal gönderdiği için bağlı olduğu pin giriş (INPUT) modunda olmalıdır."
+            },
+            {
+                id: 31,
+                question: "Bir dijital devrede bir LED’in çalışması için ne gereklidir?",
+                options: [
+                    "a) Doğru bağlantı",
+                    "b) Ses sinyali",
+                    "c) Işık sinyali",
+                    "d) Isı sinyali"
+                ],
+                correct: "a",
+                explanation: "LED’in çalışması için artı (anot) ve eksi (katot) uçlarının doğru bağlanması gerekir."
+            },
+            {
+                id: 32,
+                question: "Dijital devrelerde bir sensörün ürettiği sinyal genellikle nasıldır?",
+                options: [
+                    "a) Analog",
+                    "b) Dijital",
+                    "c) Ses",
+                    "d) Işık"
+                ],
+                correct: "b",
+                explanation: "Dijital devrelerde sensörler genellikle 0 veya 1 gibi dijital sinyaller üretir."
+            },
+            {
+                id: 33,
+                question: "Bir dijital devrede bir LED’in parlaklığını artırmak için ne yapılır?",
+                options: [
+                    "a) PWM sinyalinin görev döngüsü artırılır",
+                    "b) Daha fazla direnç eklenir",
+                    "c) Ses sinyali gönderilir",
+                    "d) Analog sinyal kullanılır"
+                ],
+                correct: "a",
+                explanation: "PWM sinyalinin görev döngüsü (açık kalma süresi) artırılırsa, LED daha parlak yanar."
+            },
+            {
+                id: 34,
+                question: "Dijital devrelerde hangi bileşen enerji sağlar?",
+                options: [
+                    "a) LED",
+                    "b) Pil",
+                    "c) Buton",
+                    "d) Sensör"
+                ],
+                correct: "b",
+                explanation: "Pil, dijital devreye enerji sağlar ve tüm bileşenlerin çalışmasını mümkün kılar."
+            },
+            {
+                id: 35,
+                question: "Bir dijital devrede kısa devre ne anlama gelir?",
+                options: [
+                    "a) Akımın yanlış yoldan akması",
+                    "b) Devrenin çok uzun olması",
+                    "c) LED’in yanması",
+                    "d) Butonun basılması"
+                ],
+                correct: "a",
+                explanation: "Kısa devre, akımın bileşenleri atlayarak yanlış bir yoldan akmasıdır ve devreye zarar verebilir."
+            },
+            {
+                id: 36,
+                question: "Dijital devrelerde bir direncin görevi nedir?",
+                options: [
+                    "a) Akımı artırmak",
+                    "b) Akımı sınırlamak",
+                    "c) Işık üretmek",
+                    "d) Ses üretmek"
+                ],
+                correct: "b",
+                explanation: "Direnç, LED gibi bileşenlere fazla akım giderek zarar görmesini önler."
+            },
+            {
+                id: 37,
+                question: "Bir dijital devrede bir LED’in yanıp sönme süresi nasıl ayarlanır?",
+                options: [
+                    "a) Gecikme süreleriyle",
+                    "b) Ses sinyaliyle",
+                    "c) Işık sinyaliyle",
+                    "d) Dirençle"
+                ],
+                correct: "a",
+                explanation: "Mikrodenetleyici, LED’in yanıp sönme süresini gecikme süreleriyle (örneğin, 500 ms açık, 500 ms kapalı) ayarlar."
+            },
+            {
+                id: 38,
+                question: "Dijital devrelerde hangi cihaz genellikle program yazılır?",
+                options: [
+                    "a) LED",
+                    "b) Mikrodenetleyici",
+                    "c) Direnç",
+                    "d) Kablo"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, program yazılarak devrenin nasıl çalışacağının belirlendiği cihazdır."
+            },
+            {
+                id: 39,
+                question: "Bir dijital devrede bir sensörün bağlı olduğu pin nasıl okunur?",
+                options: [
+                    "a) Işıkla",
+                    "b) Mikrodenetleyiciyle",
+                    "c) Dirençle",
+                    "d) Kabloyla"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, sensörün bağlı olduğu pinden dijital sinyali okuyarak veriyi işler."
+            },
+            {
+                id: 40,
+                question: "Dijital devrelerde bir LED’in bağlı olduğu devrede direnç kullanılmazsa ne olur?",
+                options: [
+                    "a) LED daha parlak yanar",
+                    "b) LED zarar görür",
+                    "c) LED yanmaz",
+                    "d) Devre kapanır"
+                ],
+                correct: "b",
+                explanation: "Direnç olmazsa, LED’e fazla akım gider ve bu, LED’in yanmasına veya zarar görmesine neden olur."
+            },
+            {
+                id: 41,
+                question: "Dijital devrelerde hangi bileşen çevreden bilgi toplar?",
+                options: [
+                    "a) LED",
+                    "b) Sensör",
+                    "c) Direnç",
+                    "d) Pil"
+                ],
+                correct: "b",
+                explanation: "Sensörler, çevreden bilgi (örneğin, ışık, sıcaklık) toplar ve bunu dijital sinyale çevirir."
+            },
+            {
+                id: 42,
+                question: "Bir dijital devrede bir butonun basılı olması neyi gösterir?",
+                options: [
+                    "a) LOW sinyali",
+                    "b) HIGH sinyali",
+                    "c) Işık sinyali",
+                    "d) Ses sinyali"
+                ],
+                correct: "b",
+                explanation: "Buton basıldığında genellikle HIGH (1) sinyali üretilir."
+            },
+            {
+                id: 43,
+                question: "Dijital devrelerde bir LED’in bağlı olduğu pin hangi sinyalle söner?",
+                options: [
+                    "a) HIGH",
+                    "b) LOW",
+                    "c) Analog",
+                    "d) Ses"
+                ],
+                correct: "b",
+                explanation: "LED, LOW (0) sinyaliyle söner, çünkü bu sinyal pini kapatır."
+            },
+            {
+                id: 44,
+                question: "Dijital devrelerde bir mikrodenetleyicinin görevi nedir?",
+                options: [
+                    "a) Işık üretmek",
+                    "b) Devreyi kontrol etmek",
+                    "c) Ses üretmek",
+                    "d) Enerji üretmek"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyici, devredeki bileşenleri (LED, sensör) kontrol eder ve programlanan görevleri yerine getirir."
+            },
+            {
+                id: 45,
+                question: "Dijital devrelerde hangi bileşen bir devrenin durumunu değiştirir?",
+                options: [
+                    "a) LED",
+                    "b) Buton",
+                    "c) Direnç",
+                    "d) Pil"
+                ],
+                correct: "b",
+                explanation: "Buton, devrenin durumunu değiştirir (örneğin, basıldığında HIGH sinyali üretir)."
+            },
+            {
+                id: 46,
+                question: "Bir dijital devrede bir sensörün ürettiği sinyal nasıl işlenir?",
+                options: [
+                    "a) Mikrodenetleyiciyle",
+                    "b) Işıkla",
+                    "c) Sesle",
+                    "d) Dirençle"
+                ],
+                correct: "a",
+                explanation: "Mikrodenetleyici, sensörün ürettiği dijital sinyali okuyarak ne yapılacağına karar verir."
+            },
+            {
+                id: 47,
+                question: "Dijital devrelerde bir LED’in yanıp sönmesi için ne gereklidir?",
+                options: [
+                    "a) Programlanmış bir mikrodenetleyici",
+                    "b) Ses sinyali",
+                    "c) Işık sinyali",
+                    "d) Analog sinyal"
+                ],
+                correct: "a",
+                explanation: "LED’in yanıp sönmesi için mikrodenetleyiciye program yazılır ve HIGH/LOW sinyalleri sırayla gönderilir."
+            },
+            {
+                id: 48,
+                question: "Dijital devrelerde hangi bileşen genellikle çıkış olarak kullanılır?",
+                options: [
+                    "a) Buton",
+                    "b) LED",
+                    "c) Sensör",
+                    "d) Direnç"
+                ],
+                correct: "b",
+                explanation: "LED, dijital devrelerde çıkış olarak kullanılır ve ışık yayarak durumu gösterir."
+            },
+            {
+                id: 49,
+                question: "Bir dijital devrede bir butonun bağlı olduğu pin nasıl ayarlanır?",
+                options: [
+                    "a) Çıkış (OUTPUT)",
+                    "b) Giriş (INPUT)",
+                    "c) Analog",
+                    "d) Kapalı"
+                ],
+                correct: "b",
+                explanation: "Buton, sinyal gönderdiği için bağlı olduğu pin giriş (INPUT) modunda ayarlanır."
+            },
+            {
+                id: 50,
+                question: "Dijital devrelerde bir mikrodenetleyiciye program yazmak için ne kullanılır?",
+                options: [
+                    "a) LED",
+                    "b) Bilgisayar",
+                    "c) Direnç",
+                    "d) Kablo"
+                ],
+                correct: "b",
+                explanation: "Mikrodenetleyiciye program yazmak için bir bilgisayar kullanılır. Örneğin, Arduino IDE gibi yazılımlar bu amaçla kullanılır."
+            }
+        ];
+
+        // Dinamik olarak soruları oluştur
+        const quizForm = document.getElementById('quizForm');
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `q${index + 1}`;
+            questionDiv.innerHTML = `
+                <h3>${q.id}. ${q.question}</h3>
+                <div class="options">
+                    ${q.options.map(opt => `<label><input type="radio" name="q${index + 1}" value="${opt[0]}"> ${opt}</label>`).join('')}
+                </div>
+                <div class="question-summary" id="summary${index + 1}"></div>
+            `;
+            quizForm.insertBefore(questionDiv, document.getElementById('submitExam'));
+        });
+
+        // Sınavı bitirme, puan hesaplama ve her sorunun altında özet gösterimi
+        document.getElementById('submitExam').addEventListener('click', () => {
+            let score = 0;
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+                const selectedOption = selected ? questions[index].options.find(opt => opt.startsWith(selected.value)) : "Cevap seçilmedi";
+                const correctOption = questions[index].options.find(opt => opt.startsWith(q.correct));
+                const isCorrect = selected && selected.value === q.correct;
+
+                if (isCorrect) {
+                    score += 2; // Her doğru cevap 2 puan
+                }
+
+                // Her sorunun altında özet göster
+                const summaryDiv = document.getElementById(`summary${index + 1}`);
+                summaryDiv.className = `question-summary ${isCorrect ? 'correct' : 'incorrect'}`;
+                summaryDiv.innerHTML = `
+                    <p><strong>Seçtiğiniz cevap:</strong> ${selectedOption}</p>
+                    <p><strong>Doğru cevap:</strong> ${correctOption}</p>
+                    <p><strong>Durum:</strong> <span class="summary-status ${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Doğru' : 'Yanlış'}</span></p>
+                    <p><strong>Çözüm:</strong> ${q.explanation}</p>
+                `;
+                summaryDiv.style.display = 'block';
+            });
+
+            // Puanı göster
+            document.getElementById('score').innerHTML = `Toplam Puanınız: ${score} / 100`;
+
+            // Sayfayı en üste kaydır
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
